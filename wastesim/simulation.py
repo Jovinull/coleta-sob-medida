@@ -103,7 +103,7 @@ class Simulation:
         self.pred_pairs: list[tuple] = []        # (t_alvo, i, pred, persist)
         self.trace = None
         if self.cfg.record_trace:
-            self.trace = dict(fill=[], est=[], t=[], trucks=[], routes=[])
+            self.trace = dict(fill=[], est=[], t=[], trucks=[], routes=[], kpi=[], stale=[])
 
     def _in_eval(self, step: int) -> bool:
         return step >= self.warm_step
@@ -113,7 +113,6 @@ class Simulation:
         t_wall = time.perf_counter()
         tc = self.cfg.time
         plan_step = int(tc.plan_hour * self.spd / 24)
-        inflow = self.demand.inflow_l
         V = self.V
         for t in range(self.T):
             now = t * self.step_s
@@ -122,22 +121,7 @@ class Simulation:
                 self.m["stock_start_l"] = float(self.fill.sum() * V)
             if t % self.spd == plan_step:
                 self._plan(day, now)
-            # 2. geração
-            prev_full = self.fill >= 1.0
-            self.fill += inflow[:, t] / V
-            over = self.fill > 1.0
-            if self._in_eval(t):
-                self.m["generated_l"] += inflow[:, t].sum()
-                if over.any():
-                    self.m["overflow_l"] += float(((self.fill[over] - 1.0) * V).sum())
-            self.fill[over] = 1.0
-            full = self.fill >= 1.0
-            new_full = full & ~prev_full
-            if self._in_eval(t):
-                self.m["overflow_events"] += int(new_full.sum())
-                self.m["full_container_h"] += float(full.sum()) * self.step_s / H
-            c80 = (self.fill >= 0.8) & (self.cross80 < 0)
-            self.cross80[c80] = now + self.step_s
+            self._generate(t, now)
             # 3. veículos
             for tr in self.trucks:
                 if not tr.done:
@@ -156,6 +140,26 @@ class Simulation:
         out = self._summarize()
         out["wall_s"] = time.perf_counter() - t_wall
         return out
+
+    def _generate(self, t: int, now: float):
+        """Geração de resíduos no passo t e contabilização de transbordamento."""
+        V = self.V
+        q = self.demand.inflow_l[:, t]
+        prev_full = self.fill >= 1.0
+        self.fill += q / V
+        over = self.fill > 1.0
+        ev = self._in_eval(t)
+        if ev:
+            self.m["generated_l"] += q.sum()
+            if over.any():
+                self.m["overflow_l"] += float(((self.fill[over] - 1.0) * V).sum())
+        self.fill[over] = 1.0
+        full = self.fill >= 1.0
+        if ev:
+            self.m["overflow_events"] += int((full & ~prev_full).sum())
+            self.m["full_container_h"] += float(full.sum()) * self.step_s / H
+        c80 = (self.fill >= 0.8) & (self.cross80 < 0)
+        self.cross80[c80] = now + self.step_s
 
     def _plan(self, day: int, now: float):
         tc = self.cfg.time
@@ -311,6 +315,10 @@ class Simulation:
         self.trace["fill"].append(self.fill.astype(np.float32).copy())
         self.trace["est"].append(np.where(stale, -1.0, est).astype(np.float32))
         self.trace["trucks"].append(tr)
+        self.trace["stale"].append(stale.copy())
+        km_now = self.m.get("km", 0.0) + sum(t.km for t in self.trucks if not t.done)
+        self.trace["kpi"].append((km_now, int(self.m.get("visits", 0)),
+                                  self.m.get("overflow_l", 0.0) / 1000, int((self.fill >= 1.0).sum())))
 
     # ------------------------------------------------------------ resumo
     def _summarize(self) -> dict:

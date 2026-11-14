@@ -1,0 +1,15 @@
+% Laço da simulação em tempo discreto
+\begin{tikzpicture}[font=\sffamily\scriptsize, node distance=3.2mm,
+  st/.style={draw, rounded corners=2pt, text width=58mm, align=left, inner sep=3pt, fill=#1},
+  st/.default=white, arr/.style={-{Stealth[length=1.8mm]}, thick}]
+\node[st=gray!10] (init) {\textbf{Inicialização} (semente $s$): malha e posições; matriz de geração $q_{i,t}$; fluxos de ruído, falhas e perdas (números aleatórios comuns a todas as políticas)};
+\node[st=red!8, below=of init] (plan) {\textbf{Se $t$ = 06h:} política escolhe contêineres e o OR-Tools gera as rotas do dia a partir do \emph{estado estimado}};
+\node[st=orange!10, below=of plan] (gen) {\textbf{Geração:} $f_i \leftarrow f_i + q_{i,t}/V$; excedente acima de $V$ = transbordamento};
+\node[st=yellow!15, below=of gen] (truck) {\textbf{Veículos:} avançam até o fim do passo; coletam o volume \emph{verdadeiro}; desvio ao depósito se a carga exceder $Q$; retornam se a jornada não comportar a próxima visita};
+\node[st=blue!8, below=of truck] (sense) {\textbf{Sensores:} dispositivos programados medem $d$ (ruído, viés de superfície, falhas) e transmitem pelo canal (perda, atraso, duplicação, interrupções)};
+\node[st=green!10, below=of sense] (ing) {\textbf{Ingestão:} mensagens que chegam no passo são validadas, deduplicadas e filtradas; atualiza ocupação e taxa estimadas};
+\node[st=purple!8, below=of ing] (met) {\textbf{Métricas} (somente após 7 dias de aquecimento): km, visitas, transbordamento, ocupação na coleta, espera, telemetria, balanço de volume};
+\draw[arr] (init) -- (plan);
+\foreach \a/\b in {plan/gen, gen/truck, truck/sense, sense/ing, ing/met} \draw[arr] (\a) -- (\b);
+\draw[arr] (met.east) -- ++(5mm,0) |- node[pos=0.25, right, align=left] {$t \leftarrow t+1$\\(15 min)} (plan.east);
+\end{tikzpicture}

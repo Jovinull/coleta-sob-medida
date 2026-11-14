@@ -1,0 +1,37 @@
+% Arquitetura da plataforma (camadas efetivamente implementadas)
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, text width=42mm, fill=#1},
+  box/.default=white,
+  side/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, text width=25mm, fill=#1},
+  lay/.style={font=\sffamily\scriptsize\bfseries, text=black!65, anchor=east, align=right},
+  arr/.style={-{Stealth[length=2mm]}, thick},
+  darr/.style={-{Stealth[length=2mm]}, thick, dashed, black!60}]
+\def\dy{1.35}
+\node[box=orange!12, text width=30mm] (fw) at (-2.0,0) {ESP32 + HC-SR04 + DHT11\\{\tiny firmware 2.0 (protótipo físico)}};
+\node[box=orange!12, text width=30mm] (vd) at (2.0,0) {Contêineres virtuais\\{\tiny sensor ultrassônico simulado}};
+\node[box=blue!10] (broker) at (0,-1*\dy-0.2) {Broker Eclipse Mosquitto 2.0\\{\tiny MQTT 3.1.1 · \texttt{residuos/dispositivos/\{id\}/...}}};
+\node[box=green!10] (ing) at (0,-2*\dy-0.2) {Ingestão\\{\tiny esquema · deduplicação · ordem · mediana}};
+\node[box=green!10] (est) at (0,-3*\dy-0.2) {Estado estimado por contêiner\\{\tiny ocupação · taxa de enchimento · atualidade}};
+\node[box=red!8] (pol) at (0,-4*\dy-0.2) {Políticas A, B, C, D\\{\tiny calendário · limiar · prêmio · previsão}};
+\node[box=red!8] (vrp) at (0,-5*\dy-0.2) {Roteirização\\{\tiny OR-Tools (CVRP com prêmios) · NN + 2-opt}};
+\node[box=yellow!15] (exe) at (0,-6*\dy-0.2) {Execução das rotas\\{\tiny veículos · desvio de descarga · jornada}};
+\node[side=gray!10] (db) at (4.6,-2*\dy-0.2) {SQLite\\{\tiny telemetria · estado · eventos · coletas · rotas}};
+\node[side=gray!10] (dash) at (4.6,-3*\dy-0.2) {Painel web\\{\tiny FastAPI + JavaScript}};
+\node[side=purple!8] (exp) at (4.6,-6*\dy-0.2) {Avaliação\\{\tiny experimentos · estatística}};
+\draw[arr] (fw.south) -- (fw.south |- broker.north);
+\draw[arr] (vd.south) -- (vd.south |- broker.north);
+\foreach \a/\b in {broker/ing, ing/est, est/pol, pol/vrp, vrp/exe} \draw[arr] (\a) -- (\b);
+\draw[arr] (ing) -- (db);
+\draw[arr] (est) -- (dash);
+\draw[arr] (exe) -- (exp);
+\draw[darr] (exe.west) -- ++(-0.6,0) |- (est.west);
+\draw[darr] (exp.east) -- ++(0.5,0) |- (vd.east);
+\node[lay] at (-3.75,0) {1 Dispositivos};
+\node[lay] at (-3.75,-1*\dy-0.2) {2 Comunicação};
+\node[lay] at (-3.75,-2*\dy-0.2) {3 Ingestão};
+\node[lay] at (-3.75,-4.5*\dy-0.2) {5 Inteligência\\operacional};
+\node[lay, anchor=south] at (db.north) {4 Persistência};
+\node[lay, anchor=north] at (dash.south) {6 Visualização};
+\node[lay, anchor=north] at (exp.south) {7 Avaliação};
+\end{tikzpicture}

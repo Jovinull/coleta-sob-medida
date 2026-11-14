@@ -1,0 +1,14 @@
+% Protocolo experimental
+\begin{tikzpicture}[font=\sffamily\scriptsize, node distance=3mm and 4mm,
+  e/.style={draw, rounded corners=2pt, text width=34mm, align=left, inner sep=3pt, fill=#1, minimum height=15mm},
+  arr/.style={-{Stealth[length=1.8mm]}, thick}]
+\node[draw, rounded corners=2pt, fill=gray!10, text width=118mm, align=center] (base) {Cenário-base: malha de Aracaju (OSM), contêineres hipotéticos de 1.100 L, 7 dias de aquecimento + 28 dias avaliados; sementes 1001--1030; números aleatórios comuns; métricas primárias: km/dia e transbordamento (\% do volume gerado)};
+\node[e=red!6, below left=4mm and -38mm of base] (e1) {\textbf{E1} comparação principal\\$N\in\{20,100,500\}$\\A, B, B-OR, C, D\\30 sementes (450 execuções)};
+\node[e=red!6, right=of e1] (e2) {\textbf{E2} fronteiras km $\times$ serviço\\5--7 níveis de limiar\\A, B-OR, C, D; 20 sementes (440)};
+\node[e=red!6, right=of e2] (e3) {\textbf{E3} robustez da telemetria\\perda, interrupções, ruído, falhas, amostragem, \emph{fallback}\\30 sementes (1.860)};
+\node[e=red!6, below=of e1] (e4) {\textbf{E4} sensibilidade\\demanda, variabilidade, mudança de regime, frota, layout, velocidade\\30 sementes (1.200)};
+\node[e=red!6, right=of e4] (e5) {\textbf{E5} solver\\descida gulosa $\times$ GLS (5 s)\\$N=500$; 10 sementes (60)};
+\node[e=blue!8, right=of e5] (e6) {\textbf{E6} MQTT real\\entrega e latência, equivalência, reinício do broker, LWT, mensagens inválidas};
+\node[draw, rounded corners=2pt, fill=green!8, text width=118mm, align=center, below=4mm of e5] (st) {Análise pareada por semente: IC 95\% \emph{bootstrap} da diferença média; Wilcoxon bilateral; correção de Holm por família; correlação bisserial de postos; balanço de volume verificado em todas as execuções};
+\draw[arr] (base.south) -- ++(0,-2mm);
+\end{tikzpicture}

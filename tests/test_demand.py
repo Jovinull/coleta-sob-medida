@@ -48,3 +48,11 @@ def test_regime_shift():
     s = 10 * t.steps_per_day
     assert np.allclose(a.inflow_l[:, :s], b.inflow_l[:, :s])
     assert b.inflow_l[:, s:].sum() > 1.4 * a.inflow_l[:, s:].sum()
+
+
+def test_total_mean_includes_expected_events():
+    """A taxa de longo prazo usada pela política A inclui os descartes volumosos."""
+    d, t = gen(seed=5, days=400)
+    realized = d.inflow_l.sum(1) / t.total_days
+    assert np.median(realized / d.mu_total_l_day) == pytest.approx(1.0, abs=0.04)
+    assert (d.mu_total_l_day > d.mu_l_day).all()

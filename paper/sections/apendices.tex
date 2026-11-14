@@ -1,0 +1,78 @@
+\section{Reprodução dos experimentos}\label{ap:reproducao}
+
+O repositório do projeto contém o código, os dados brutos e os scripts
+necessários para reproduzir todos os resultados. Com Python~3.12 e Docker ou
+Podman, a sequência é:
+
+\begin{small}
+\begin{verbatim}
+uv venv --python 3.12 .venv && source .venv/bin/activate
+uv pip install -e ".[dev]"            # versões fixadas em requirements-lock.txt
+python -m pytest -q                   # testes automatizados
+scripts/broker.sh start               # Mosquitto 2.0.20 em 127.0.0.1:1883
+python -m experiments.run E1 E2 E3 E4 --workers 5
+python -m experiments.run E5 --workers 3
+python -m experiments.mqtt_integration
+python -m experiments.replay && python -m experiments.analysis
+python -m experiments.figures && python -m experiments.animations
+python scripts/verify_reproducibility.py
+scripts/build_paper.sh                # TeX Live 2026 em contêiner
+\end{verbatim}
+\end{small}
+
+O executor grava uma linha por execução em \texttt{experiments/raw/E*.jsonl},
+com a configuração completa, a semente e as métricas, e pula execuções já
+concluídas, o que permite interromper e retomar a rodada. Os manifestos
+registram o \emph{commit} do código, as versões das bibliotecas e a
+plataforma.
+
+\section{Material suplementar}\label{ap:suplementar}
+
+As animações abaixo foram geradas a partir de execuções gravadas e estão no
+diretório \texttt{animations/} do repositório, em GIF e MP4. Nenhuma delas é
+ilustração conceitual: os quadros reproduzem os estados registrados.
+
+\begin{description}
+  \item[A\_enchimento] Ocupação de seis contêineres ao longo de 7 dias
+  (política A, semente 1001).
+  \item[B\_telemetria\_mqtt] Telemetria recebida pela plataforma pelo broker
+  Mosquitto em uma execução do modo \emph{live} (80 contêineres virtuais), com
+  eventos de limiar.
+  \item[C\_coleta\_veiculos] Veículos executando as rotas da política D na
+  malha de Aracaju.
+  \item[D\_comparacao\_A\_D] Comparação sincronizada das políticas A e D com a
+  mesma demanda.
+  \item[E\_falha\_comunicacao] Estado verdadeiro e estado visto pela plataforma
+  durante uma interrupção regional de 48~h.
+\end{description}
+
+\section{Mapa de pinos do firmware 2.0}\label{ap:pinos}
+
+\begin{table}[ht]
+\centering
+\caption{Ligações do protótipo com o firmware 2.0 (DOIT ESP32 DevKit V1).}
+\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+Sinal & GPIO & Observação \\
+\midrule
+HC-SR04 TRIG & 14 & nível alto de 3,3~V é suficiente para o disparo \\
+HC-SR04 ECHO & 27 & via divisor 1~k$\Omega$ (série) / 2~k$\Omega$ (terra): $5 \times 2/3 \approx 3{,}33$~V \\
+DHT11 DATA & 4 & alimentação em 3,3~V; \emph{pull-up} de 4,7--10~k$\Omega$ para 3,3~V \\
+LED & 2 & LED da placa; saída \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Declaração de uso de ferramentas de inteligência artificial}\label{ap:ia}
+
+O desenvolvimento desta versão contou com a assistência de um modelo de
+linguagem (Claude, da Anthropic) na revisão bibliográfica (busca e conferência
+de metadados), na escrita e revisão do código, na execução dos experimentos e
+na redação do texto. Todas as referências tiveram os metadados conferidos em
+fontes oficiais (Crossref, OpenAlex ou página do editor), e o registro dessa
+verificação, incluindo quais textos foram lidos integralmente e quais apenas
+pelo resumo, está em \texttt{paper/references/biblioteca.csv}. Os resultados
+numéricos foram produzidos pelos programas do repositório e inseridos no texto
+automaticamente. A responsabilidade pelo conteúdo é dos autores, e o uso dessa
+assistência deve observar as normas da instituição.

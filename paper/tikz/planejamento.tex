@@ -1,0 +1,23 @@
+% Fluxo de decisão diária e execução
+\begin{tikzpicture}[font=\sffamily\scriptsize,
+  b/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, fill=#1},
+  b/.default=white, d/.style={draw, diamond, aspect=2.2, align=center, inner sep=1pt, fill=yellow!12},
+  arr/.style={-{Stealth[length=1.8mm]}, thick}]
+\node[b=green!10, text width=34mm] (est) at (0,0) {Estado estimado\\$\hat f_i$, $\hat r_i$, idade do dado};
+\node[d] (stale) at (0,-1.45) {dado\\$>$ 24 h?};
+\node[b, text width=30mm] (fb) at (3.6,-1.45) {\emph{fallback}:\\$\hat f_i + \hat r^{\,\mathrm{longo}}_i\,\Delta t$};
+\node[d] (pol) at (0,-3.0) {política};
+\node[b=red!6, text width=24mm] (A) at (-4.95,-4.6) {\textbf{A}: vencidos no calendário $p_i$ e pendentes};
+\node[b=red!6, text width=20mm] (B) at (-1.95,-4.6) {\textbf{B}: $\hat f_i \ge \theta_{hi}$\\(todos obrigatórios)};
+\node[b=red!6, text width=24mm] (C) at (1.0,-4.6) {\textbf{C}: obrig. $\hat f_i\ge\theta_{hi}$\\opc. $\hat f_i\ge\theta_{lo}$};
+\node[b=red!6, text width=29mm] (D) at (4.45,-4.6) {\textbf{D}: obrig. se $\tilde f_i(t_{\text{meio}})\ge\theta_{hi}$\\ou $\tilde f_i(t_{\text{próx}})\ge\theta_{crit}$};
+\node[b=blue!8, text width=96mm] (vrp) at (0,-6.55) {CVRP com prêmios: $\min \sum d_{ij} + \sum_{i\ \text{não visitado}} \pi_i$ \quad (capacidade $Q$, jornada $T_{\max}$, $K$ veículos)\\OR-Tools com descida gulosa (A, B-OR, C, D) ou vizinho mais próximo + 2-opt (B)};
+\node[b=yellow!15, text width=96mm] (exe) at (0,-8.25) {Execução com volumes verdadeiros: desvio ao depósito se a carga exceder $Q$;\\visitas que não cabem na jornada ficam não realizadas (A as reprograma para o dia seguinte)};
+\draw[arr] (est) -- (stale);
+\draw[arr] (stale) -- node[above]{sim} (fb);
+\draw[arr] (fb) |- (pol);
+\draw[arr] (stale) -- node[left]{não} (pol);
+\foreach \x in {A,B,C,D} \draw[arr] (pol) -- (\x.north);
+\foreach \x in {A,B,C,D} \draw[arr] (\x.south) -- (\x.south |- vrp.north);
+\draw[arr] (vrp) -- (exe);
+\end{tikzpicture}

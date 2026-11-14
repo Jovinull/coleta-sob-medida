@@ -71,9 +71,12 @@ def _gamma_mean1(rng: np.random.Generator, cv: float, size) -> np.ndarray:
 @dc.dataclass
 class Demand:
     profile: np.ndarray        # (N,) índice do perfil
-    mu_l_day: np.ndarray       # (N,) taxa média de longo prazo (sem eventos)
+    mu_l_day: np.ndarray       # (N,) taxa média de longo prazo (sem eventos) — usada no
+                               #      dimensionamento da frota
     inflow_l: np.ndarray       # (N, T) volume gerado por passo
     event_count: int
+    mu_total_l_day: np.ndarray | None = None  # (N,) média de longo prazo INCLUINDO o valor
+                               # esperado dos descartes volumosos — o "histórico perfeito" da política A
 
     @property
     def profile_names(self) -> list[str]:
@@ -123,5 +126,7 @@ def generate(cfg: DemandCfg, tcfg: TimeCfg, ccfg: ContainerCfg, n: int,
             vol = rng.uniform(lo, hi) * ccfg.volume_l
             inflow[i, t0:t0 + steps_per_h] += vol / steps_per_h
             total_ev += 1
+    ev_mean = cfg.event_rate_per_day * 0.5 * (lo + hi) * ccfg.volume_l
     return Demand(profile=profile, mu_l_day=mu * cfg.intensity,
-                  inflow_l=inflow, event_count=total_ev)
+                  inflow_l=inflow, event_count=total_ev,
+                  mu_total_l_day=mu * cfg.intensity + ev_mean)

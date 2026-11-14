@@ -1,0 +1,20 @@
+% Sequência MQTT: conexão com LWT, telemetria, falha abrupta
+\begin{tikzpicture}[font=\sffamily\tiny, >={Stealth[length=1.7mm]}]
+\def\yb{-8.6}
+\foreach \x/\n/\c in {0/Dispositivo (ESP32 ou virtual)/orange!12, 6.4/Broker Mosquitto/blue!10, 12.8/Plataforma (ingestão)/green!10}{
+  \node[draw, rounded corners=2pt, fill=\c, minimum width=30mm, minimum height=6mm] at (\x,0) {\n};
+  \draw[dashed, gray] (\x,-0.3) -- (\x,\yb);}
+\draw[->] (12.8,-0.8) -- node[above]{SUBSCRIBE \texttt{.../+/telemetria|estado|eventos} (QoS 1)} (6.4,-0.8);
+\draw[->] (0,-1.5) -- node[above, align=center]{CONNECT (id = \texttt{LX-0007}, keepalive 15 s)\\Will: \texttt{.../estado} = offline, QoS 1, retido} (6.4,-1.5);
+\draw[->] (0,-2.3) -- node[above]{PUBLISH \texttt{.../estado} = online (retido)} (6.4,-2.3);
+\draw[->] (6.4,-2.6) -- (12.8,-2.6);
+\foreach \y in {-3.4,-4.1}{
+  \draw[->] (0,\y) -- node[above]{PUBLISH \texttt{.../telemetria} \{v, id, boot, seq, ts, leituras\}} (6.4,\y);
+  \draw[->] (6.4,\y-0.2) -- (12.8,\y-0.2);}
+\node[anchor=west, align=left] at (12.9,-3.9) {valida esquema\\deduplica (id, boot, seq)\\filtro de mediana};
+\draw[->] (0,-5.0) -- node[above]{PUBLISH \texttt{.../eventos} \{tipo: limiar\_excedido\}} (6.4,-5.0);
+\draw[->] (6.4,-5.2) -- (12.8,-5.2);
+\node[red!70!black, font=\sffamily\scriptsize\bfseries] at (0,-6.0) {$\times$ queda sem DISCONNECT};
+\draw[->, red!70!black] (6.4,-6.6) -- node[above]{Will: \texttt{.../estado} = offline, motivo = lwt (retido)} (12.8,-6.6);
+\draw[->] (0,-7.6) -- node[above]{reconexão com recuo exponencial (1 $\to$ 32 s); estado = online} (6.4,-7.6);
+\end{tikzpicture}

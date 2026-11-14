@@ -1,0 +1,196 @@
+\section{Fundamentação teórica}\label{sec:fundamentacao}
+
+\subsection{Gestão de resíduos sólidos urbanos no Brasil}
+
+A Lei nº 12.305/2010 instituiu a Política Nacional de Resíduos Sólidos (PNRS),
+que define responsabilidades dos titulares do serviço público de limpeza
+urbana, exige planos de gestão e estabelece a ordem de prioridade entre não
+geração, redução, reutilização, reciclagem, tratamento e disposição final
+ambientalmente adequada \cite{brasil2010lei}. A Lei nº 14.026/2020 atualizou o
+marco legal do saneamento básico, que inclui o manejo de resíduos sólidos
+\cite{brasil2020lei}. Os dados nacionais do setor passaram a ser publicados
+pelo Sistema Nacional de Informações em Saneamento Básico (SINISA) e pelo
+SINIR \cite{brasil2025sinisa,sinirsdportal}.
+
+Este trabalho trata da etapa de coleta, e não da destinação. A coleta
+domiciliar é fortemente influenciada pela geração per capita, pela densidade
+aparente dos resíduos e pelo tipo de acondicionamento. O manual do IBAM indica
+\num{230} kg/m³ como peso específico aparente do lixo domiciliar solto, na
+falta de dados locais, e descreve contêineres plásticos de 120 a \num{1100}~L
+e caminhões compactadores de 6 a 19~m³ \cite{monteiro2001manual}. A agência
+ambiental dos Estados Unidos reporta faixas de 148 a 178~kg/m³ para resíduos
+mistos soltos e de 237 a 415~kg/m³ para resíduos compactados
+\cite{epa2016volume}. A diferença entre essas fontes já mostra que converter
+volume em massa exige hipóteses explícitas; por isso, o modelo deste trabalho
+opera em volume e só converte para massa quando a fonte do fator está indicada.
+
+\subsection{Cidades inteligentes e IoT na gestão de resíduos}
+
+Na gestão de resíduos, as aplicações de IoT mais frequentes são o
+monitoramento do nível de enchimento, a identificação de contêineres e veículos
+e a roteirização da coleta \cite{anagnostopoulos2017challenges,esmaeilian2018future}.
+Uma revisão sistemática com 173 estudos primários mapeou sensores, atuadores,
+partes interessadas e dados trocados nesses sistemas \cite{sosunova2022iot}.
+Outra revisão define a lixeira inteligente como o contêiner dotado de
+monitoramento de nível e conectividade IoT e aponta a falta de padronização
+entre as soluções \cite{zoumpoulis2024smart}. Quanto à comunicação, um
+levantamento sobre sistemas baseados em sensores identificou o LoRaWAN como o
+protocolo preferido para automação em áreas urbanas \cite{vishnu2022sensor},
+o que contrasta com o Wi-Fi usado no protótipo deste trabalho. Revisões sobre
+inteligência artificial no setor ressaltam que qualidade de dados, privacidade e
+custo ainda limitam a adoção \cite{olawade2024smart}.
+
+Uma arquitetura IoT para esse fim costuma ser descrita em camadas: dispositivos
+de borda com sensores e microcontrolador, uma camada de comunicação e uma
+camada de aplicação que armazena, processa e apresenta os dados
+\cite{oliveira2018arquitetura}. O protótipo de 2024 seguiu essa organização.
+A presente versão a desdobra em sete camadas, separando a ingestão, a
+persistência, a inteligência operacional, a visualização e a avaliação
+(Seção~\ref{sec:arquitetura}).
+
+\subsection{Medição de nível por ultrassom}
+
+O HC-SR04 emite um pulso de 40~kHz e mede o tempo até o retorno do eco. Sua
+folha de dados indica faixa de 2 a 400~cm, ângulo de medição de 15° e precisão
+de até 3~mm, e recomenda alvo com área mínima de 0,5~m² e superfície ``o mais
+lisa possível'' \cite{elecfreakssdhcsr04}. A superfície de resíduos em um
+contêiner não atende a essas condições: é irregular, pode ter sacos inclinados
+e varia de material. Como o sensor registra o primeiro eco recebido dentro do
+cone, a distância medida tende a corresponder ao ponto mais alto do monte, e
+não ao nível médio. Um estudo exploratório comparou o monitoramento por sensores ultrassônicos com
+a observação visual dos motoristas e analisou, para cada abordagem, a troca
+entre o número de coletas e o número de transbordamentos
+\cite{brouwer2023comparison}.
+
+A velocidade do som no ar varia com a temperatura. A aproximação linear
+$c \approx 331{,}3 + 0{,}606\,T$~m/s (com $T$ em °C) mostra variação de cerca
+de 5\% entre 10 e 40~°C. O DHT11 mede temperatura de 0 a 50~°C com exatidão
+típica de $\pm1$~°C \cite{drobotics2010dht11}, o que é suficiente para essa
+compensação. No protótipo original, o DHT11 foi apresentado como um sensor que
+influenciaria o nível de enchimento; nesta versão, seu papel limita-se à
+compensação da velocidade do som e ao registro de condições ambientais.
+
+\subsection{O protocolo MQTT}
+
+O MQTT é um protocolo de mensagens do tipo publicação/assinatura padronizado
+pela OASIS, nas versões 3.1.1 \cite{banks2014mqtt} e 5.0 \cite{banks2019mqtt}.
+Os clientes não se comunicam diretamente: publicam mensagens em
+\emph{tópicos} hierárquicos de um \emph{broker}, que as entrega aos clientes
+com assinaturas compatíveis, inclusive por curingas (\texttt{+} para um nível,
+\texttt{\#} para vários). Quatro recursos do protocolo são usados neste
+trabalho:
+
+\begin{itemize}
+  \item \textbf{Qualidade de serviço (QoS).} Com QoS 0, a mensagem é enviada no
+  máximo uma vez, sem confirmação; com QoS 1, ao menos uma vez, com
+  confirmação e possível duplicação; com QoS 2, exatamente uma vez, por meio
+  de um protocolo de quatro passos \cite{banks2014mqtt}. A garantia vale entre
+  cada cliente e o broker; não há garantia fim a fim se um cliente perde dados
+  antes de publicá-los.
+  \item \textbf{Mensagens retidas.} O broker guarda a última mensagem retida de
+  cada tópico e a entrega imediatamente a novos assinantes, o que é útil para
+  o estado de disponibilidade de um dispositivo.
+  \item \textbf{\emph{Last Will and Testament} (LWT).} Na conexão, o cliente
+  registra uma mensagem que o broker publica se a conexão for encerrada sem a
+  mensagem DISCONNECT, por exemplo após queda de energia ou expiração do
+  \emph{keepalive}.
+  \item \textbf{Sessões persistentes.} Com \emph{clean session} desativado, o
+  broker mantém as assinaturas e as mensagens QoS~1/2 pendentes de um cliente
+  desconectado, entregando-as na reconexão.
+\end{itemize}
+
+Essas garantias dependem do cliente usado. A biblioteca PubSubClient, empregada
+no firmware do ESP32, implementa o MQTT 3.1.1, publica apenas com QoS~0 e não
+mantém fila de mensagens durante desconexões (ver o relatório de auditoria do
+firmware no repositório). Por isso, embora o broker Eclipse Mosquitto
+\cite{light2017mosquitto} aceite o MQTT~5.0, todo o sistema foi especificado em
+MQTT~3.1.1, e nenhuma afirmação sobre recursos do MQTT~5.0 é feita.
+
+O MQTT não define autenticação nem cifragem: elas dependem do broker e do
+transporte (TLS). Brokers abertos à internet sem autenticação permitem leitura
+e injeção de mensagens por terceiros, e o protocolo é alvo de ataques de negação de
+serviço de baixa taxa, como o SlowITe, demonstrado contra serviços MQTT reais
+com e sem cifragem \cite{vaccari2020slowite}. Estudos comparativos analisam o desempenho do MQTT
+frente a protocolos como o CoAP, inclusive com mecanismos de segurança ativados
+\cite{seoane2021performance}.
+
+\subsection{Modelagem, simulação e gêmeo digital}
+
+Simulação de eventos discretos e simulação em tempo discreto são abordagens
+usuais para avaliar sistemas logísticos estocásticos quando a experimentação
+real é cara ou inviável \cite{law2024simulation}. A credibilidade dos
+resultados depende de verificação (o modelo computacional implementa
+corretamente o modelo conceitual) e de validação (o modelo conceitual
+representa o sistema real com exatidão suficiente para o propósito)
+\cite{sargent2013verification}. Quando várias alternativas são comparadas, o
+uso de \emph{números aleatórios comuns}, isto é, a submissão de todas as
+alternativas às mesmas realizações das variáveis aleatórias, reduz a
+variância das diferenças estimadas e permite comparações pareadas
+\cite{glasserman1992some}.
+
+O termo \emph{gêmeo digital} é usado com frequência em plataformas urbanas de
+monitoramento \cite{barth2023data,cardenasleon2024urban}, nem sempre com o
+mesmo significado. A revisão de \cite{kritzinger2018digital} distingue, segundo
+o nível de integração de dados entre o objeto físico e sua contraparte digital,
+três categorias: \emph{modelo digital}, \emph{sombra digital} e \emph{gêmeo
+digital}\footnote{Apenas o resumo desse artigo foi consultado; o texto completo
+não pôde ser obtido por acesso automatizado.}. Neste trabalho, adota-se o
+seguinte critério operacional, coerente com essa gradação: há sombra digital
+quando o estado do objeto físico atualiza automaticamente o modelo, e só se
+fala em gêmeo digital quando, além disso, as decisões do modelo retornam
+automaticamente ao objeto físico. A plataforma desenvolvida mantém, para cada
+contêiner, um estado estimado atualizado automaticamente pela telemetria, mas
+as decisões voltam ao ``mundo físico'' por meio de rotas executadas por
+veículos, e esse mundo é, ele próprio, simulado. A solução corresponde,
+portanto, a uma \emph{sombra digital} acoplada a um simulador. Por esse motivo,
+o termo ``gêmeo digital'', considerado no título provisório deste trabalho, não
+foi adotado.
+
+\subsection{Roteirização de veículos}
+
+O problema de roteirização de veículos (VRP) foi formulado por
+\cite{dantzig1959truck} e consiste em definir rotas de custo mínimo que partem
+de um depósito e atendem um conjunto de clientes. Na variante capacitada
+(CVRP), a soma das demandas de cada rota não pode exceder a capacidade do
+veículo; restrições de duração de jornada e de janelas de tempo geram outras
+variantes \cite{toth2014vehicle}. Como o CVRP é NP-difícil, instâncias
+práticas são resolvidas por heurísticas: construtivas, como o vizinho mais
+próximo \cite{rosenkrantz1977analysis} e as economias de
+\cite{clarke1964scheduling}; de melhoria local, como o 2-opt
+\cite{croes1958method}; e metaheurísticas, como a busca local guiada (GLS)
+\cite{voudouris1999guided}. A biblioteca de roteirização do Google OR-Tools
+combina essas técnicas em um resolvedor de propósito geral
+\cite{furnon2025ortools,perron2025ortools}. Nenhuma dessas heurísticas garante
+a solução ótima, e os resultados deste trabalho não são apresentados como
+ótimos.
+
+A coleta de resíduos é um caso particular bastante estudado
+\cite{belien2014municipal,han2015waste,hess2024waste}. Quando o nível dos
+contêineres é conhecido, a decisão diária passa a incluir \emph{quais}
+contêineres visitar, além da ordem de visita. Essa estrutura aproxima o
+problema do roteamento de inventário, no qual se decide simultaneamente quando
+reabastecer (aqui, esvaziar) cada ponto e como roteirizar \cite{mes2014inventory}.
+Uma formulação conveniente é o CVRP com prêmios (\emph{prize-collecting}): cada
+contêiner não visitado gera uma penalidade, e o resolvedor equilibra a
+distância adicional com o benefício de visitar. Como os volumes reais só são
+conhecidos na chegada, a execução pode exigir um desvio ao depósito quando o
+caminhão enche, o que corresponde à política de recurso clássica do VRP com
+demandas estocásticas \cite{dror1989vehicle}.
+
+\subsection{Avaliação experimental}
+
+Em experimentos de simulação com réplicas independentes, cada semente aleatória
+produz uma observação de cada métrica. Com números aleatórios comuns, as
+observações de duas políticas na mesma semente formam pares. O teste de postos
+sinalizados de \cite{wilcoxon1945individual} compara pares sem supor
+normalidade das diferenças; quando várias comparações são feitas, o
+procedimento de \cite{holm1979simple} controla a taxa de erro do tipo~I da
+família de testes. Intervalos de confiança podem ser obtidos por reamostragem
+\emph{bootstrap} \cite{efron1979bootstrap,efron1993introduction}, e a correlação
+bisserial de postos pareada, calculada pela fórmula da diferença simples
+\cite{kerby2014simple}, fornece um tamanho de efeito entre $-1$ e $1$. A
+ausência de significância estatística não demonstra equivalência; apenas indica
+que os dados não permitem distinguir as alternativas com a confiança adotada.
+Por fim, a reprodutibilidade de experimentos computacionais exige registrar
+versões de código e dependências, sementes, parâmetros e dados brutos
+\cite{sandve2013ten,peng2011reproducible}.

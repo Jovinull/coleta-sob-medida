@@ -1,0 +1,113 @@
+\section{Introdução}\label{sec:introducao}
+
+A coleta de resíduos sólidos urbanos (RSU) é um serviço contínuo, caro e muito
+visível para a população. Os indicadores nacionais de 2024 registram, para o
+Brasil, 1,14 kg de RSU coletado por habitante por dia e, considerando
+apenas os resíduos domiciliares, 0,84 kg/hab$\cdot$dia; no Nordeste,
+esses valores são 1,21 e 0,88 kg/hab$\cdot$dia, respectivamente
+\cite[p.~25--26]{brasil2025sinisa}. Em uma capital como Aracaju, com
+602.757 habitantes no Censo de 2022 \cite{ibge2022censo}, isso equivale a
+centenas de toneladas de resíduos domiciliares por dia, que precisam ser
+recolhidas por frotas com capacidade, jornada e custo limitados. A Política
+Nacional de Resíduos Sólidos \cite{brasil2010lei} e o marco legal do saneamento
+\cite{brasil2020lei} reforçam a exigência de planejamento e de indicadores para
+esse serviço.
+
+Na prática mais comum, a coleta segue roteiros e frequências fixos: cada
+contêiner é visitado em dias predeterminados, esteja cheio ou quase vazio. Essa
+regra é simples de operar, mas não se ajusta às variações de geração entre
+locais e entre dias. Contêineres que enchem rápido transbordam antes da visita;
+outros são esvaziados com pouca carga. A Internet das Coisas (IoT) oferece uma
+alternativa: sensores de nível instalados nos contêineres transmitem a ocupação
+para uma plataforma, que decide quais pontos visitar e em que ordem
+\cite{anagnostopoulos2017challenges,esmaeilian2018future}. A literatura relata
+reduções de distância percorrida com esse tipo de estratégia, mas também mostra
+que os ganhos estimados em simulação tendem a ser maiores que os observados em
+implantações reais. Uma meta-análise recente encontrou redução média de
+39,79\% nos estudos de simulação e de 12,37\% nos estudos de campo
+\cite{maciel2025impact}. Parte dessa diferença pode decorrer de hipóteses
+favoráveis demais nos modelos, como sensores sem erro, comunicação perfeita e
+comparações com linhas de base pouco exigentes.
+
+Este trabalho é a continuação do Trabalho de Conclusão de Curso apresentado em
+2024\footnote{A versão de 2024 está preservada sem alterações no repositório do
+projeto, no diretório \texttt{original/}.}, no qual foi montado, a partir da
+arquitetura em três camadas de \cite{oliveira2018arquitetura}, um protótipo com ESP32,
+sensor ultrassônico HC-SR04, sensor de temperatura e umidade DHT11 e
+comunicação MQTT. O protótipo demonstrou a troca de mensagens entre dispositivo,
+broker e aplicativo, mas não avaliou se o monitoramento melhoraria a coleta, e
+o firmware continha erros que invertiam o significado da medida de enchimento
+(Seção~\ref{sec:firmware}). A presente versão mantém o tema e o hardware
+original, corrige o firmware e acrescenta o que faltava para responder à
+pergunta operacional: uma plataforma de simulação em que contêineres virtuais
+publicam telemetria por MQTT, uma camada de ingestão que estima o estado de cada
+contêiner e um módulo de planejamento que compara estratégias de coleta sob as
+mesmas condições.
+
+\subsection{Problema e questões de pesquisa}
+
+O problema investigado é \emph{como uma arquitetura IoT com sensores de nível,
+comunicação MQTT e planejamento orientado por dados pode apoiar a eficiência
+da coleta de RSU, considerando as imperfeições de medição e de comunicação}.
+Ele foi desdobrado em cinco questões:
+
+\begin{description}
+  \item[QP1] Como o monitoramento do nível de enchimento pode apoiar a decisão
+  de quando coletar?
+  \item[QP2] Em cenários equivalentes, que diferenças operacionais existem entre
+  a coleta periódica fixa, a coleta por limiar de enchimento e a coleta
+  dinâmica com otimização de rotas, com ou sem previsão?
+  \item[QP3] Como perda e atraso de mensagens, indisponibilidade de sensores e
+  ruído de medição afetam essas estratégias?
+  \item[QP4] Qual é a influência da quantidade e da distribuição dos
+  contêineres, da demanda e da frota sobre os resultados?
+  \item[QP5] Em que condições a estratégia orientada por dados traz ganhos
+  relevantes e em quais a complexidade adicional não se justifica?
+\end{description}
+
+\subsection{Objetivos}
+
+O objetivo geral é desenvolver e avaliar experimentalmente, por simulação, uma
+plataforma IoT baseada em MQTT para monitoramento de contêineres e planejamento
+da coleta de RSU. Os objetivos específicos são:
+(i)~auditar e corrigir o firmware do protótipo de 2024;
+(ii)~especificar um contrato de mensagens MQTT com identificação de
+dispositivo, sequência, validade e versão de esquema;
+(iii)~implementar um simulador de contêineres, sensores ultrassônicos e canal de
+comunicação com injeção de falhas;
+(iv)~implementar a ingestão, a estimação de estado e quatro políticas de coleta
+com roteirização por otimização;
+(v)~executar experimentos pareados e reprodutíveis em um cenário construído
+sobre a malha viária real de Aracaju; e
+(vi)~analisar os resultados com estatística apropriada e discutir limites de
+validade.
+
+\subsection{Delimitação e contribuições}
+
+Nenhum componente físico novo foi montado e nenhum dado de campo foi coletado.
+Toda a avaliação quantitativa é feita por simulação; a malha viária é real
+(OpenStreetMap), mas as posições dos contêineres e do depósito são
+hipotéticas, e os resultados não representam o serviço de coleta de Aracaju.
+Os parâmetros de geração de resíduos combinam dados oficiais e hipóteses
+declaradas (Seção~\ref{sec:parametros}).
+
+As contribuições efetivamente demonstradas neste trabalho são:
+(a)~a auditoria e a reescrita do firmware, com compilação verificada;
+(b)~um contrato MQTT~3.1.1 e uma camada de ingestão que trata duplicatas,
+mensagens fora de ordem, leituras inválidas e dados desatualizados;
+(c)~uma plataforma de simulação aberta, com testes automatizados e verificação
+de balanço de volume, que usa o mesmo código de ingestão tanto com o broker
+real quanto com um canal emulado;
+(d)~um protocolo experimental pareado (números aleatórios comuns) com
+\NExecTotal{} execuções de simulação e testes de integração com o broker; e
+(e)~evidência quantitativa sobre a troca entre distância percorrida e nível de
+serviço, e sobre a sensibilidade dessas estratégias a falhas de telemetria.
+
+\subsection{Organização do texto}
+
+A Seção~\ref{sec:fundamentacao} apresenta os conceitos usados no trabalho. A
+Seção~\ref{sec:relacionados} discute trabalhos relacionados e posiciona a
+proposta. A Seção~\ref{sec:arquitetura} descreve a arquitetura, o firmware e a
+plataforma. A Seção~\ref{sec:metodologia} detalha os modelos, os parâmetros e o
+protocolo experimental. A Seção~\ref{sec:resultados} apresenta e discute os
+resultados, e a Seção~\ref{sec:conclusao} conclui o trabalho.

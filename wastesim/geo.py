@@ -142,3 +142,39 @@ def build(cfg: GeoCfg, rng: np.random.Generator) -> Geography:
     if cfg.kind == "osm":
         return osm(cfg, rng)
     raise ValueError(cfg.kind)
+
+
+def street_paths(geo: Geography, cfg: GeoCfg, routes: list[list[int]]) -> list[list[tuple[float, float]]]:
+    """Polilinhas (lat, lon) das rotas pela malha: depósito → contêineres → depósito.
+
+    ``routes`` usa índices de contêiner 0..N-1. Somente para cenários OSM; nos
+    sintéticos, devolve segmentos retos em coordenadas planas (km).
+    """
+    out = []
+    if geo.kind != "osm":
+        for r in routes:
+            pts = [0, *[c + 1 for c in r], 0]
+            out.append([tuple(geo.xy_km[p]) for p in pts])
+        return out
+    net = load_network(cfg.osm_graph)
+    key = id(geo)
+    cache = _PRED_CACHE.get(key)
+    if cache is None:
+        _, pred = net.shortest(geo.node_ids, return_predecessors=True)
+        cache = _PRED_CACHE[key] = pred
+    pred = cache
+    for r in routes:
+        pts = [0, *[c + 1 for c in r], 0]
+        poly = []
+        for a, b in zip(pts[:-1], pts[1:]):
+            src, dst = geo.node_ids[a], geo.node_ids[b]
+            seq = [dst]
+            while seq[-1] != src and seq[-1] >= 0:
+                seq.append(pred[a, seq[-1]])
+            seq.reverse()
+            poly.extend((float(net.lat[k]), float(net.lon[k])) for k in seq if k >= 0)
+        out.append(poly)
+    return out
+
+
+_PRED_CACHE: dict[int, np.ndarray] = {}

@@ -1,0 +1,38 @@
+\begin{resumo}
+Este trabalho avalia, por simulação, se o monitoramento do nível de contêineres
+por Internet das Coisas (IoT) e MQTT torna mais eficiente a coleta de resíduos
+sólidos urbanos. O firmware ESP32 do protótipo de 2024 foi auditado e
+reescrito; especificou-se um contrato MQTT~3.1.1; e construiu-se uma plataforma
+aberta em que contêineres virtuais com sensor ultrassônico simulado publicam
+telemetria, uma camada de ingestão estima o estado de cada contêiner e quatro
+políticas são comparadas sobre a malha viária real de Aracaju (SE), com
+contêineres hipotéticos: coleta periódica fixa (A), por limiar (B), dinâmica
+com roteirização por otimização (C) e preditiva (D). Em \NExecTotal{}
+execuções pareadas por semente, com 100 contêineres, a política C percorreu
+\RelNCemCvsAKm\% de distância em relação a A, mas transbordou \OvNCemC\% do
+volume gerado, contra \OvNCemA\% em A; a política D percorreu
+\RelNCemDvsAKm\% e transbordou \OvNCemD\%. No mesmo nível de serviço
+(transbordamento de 1\%), a seleção orientada por dados exigiu
+\RelFrontUmDvsA\% de distância em relação à coleta periódica. \ResumoRobustez{}
+Os resultados dependem de parâmetros de demanda não calibrados em campo e não
+representam o serviço real de Aracaju.
+\end{resumo}
+
+\begin{abstract}
+This work uses simulation to assess whether Internet of Things (IoT) fill-level
+monitoring with MQTT makes urban solid waste collection more efficient. The
+ESP32 firmware of a 2024 prototype was audited and rewritten, an MQTT~3.1.1
+message contract was specified, and an open platform was built in which
+virtual containers with a simulated ultrasonic sensor publish telemetry, an
+ingestion layer estimates each container's state, and four policies are
+compared on the real road network of Aracaju, Brazil, with hypothetical
+container sites: fixed periodic (A), threshold-based (B), dynamic with
+optimized routing (C) and predictive (D). Over \NExecTotalEn{} seed-paired runs
+with 100 containers, policy C changed daily distance by \RelNCemCvsAKmEn\%
+relative to A but let \OvNCemCEn\% of the generated volume overflow, against
+\OvNCemAEn\% under A; policy D changed distance by \RelNCemDvsAKmEn\% with
+\OvNCemDEn\% overflow. At the same service level (1\% overflow), data-driven
+selection required \RelFrontUmDvsAEn\% distance relative to periodic collection.
+\AbstractRobustez{} Results depend on demand parameters that were not
+calibrated in the field and do not represent Aracaju's actual service.
+\end{abstract}

@@ -1,0 +1,112 @@
+\section{Trabalhos relacionados}\label{sec:relacionados}
+
+\subsection{Critérios de seleção}
+
+Esta seção resulta de uma revisão narrativa, e não de uma revisão sistemática.
+As buscas foram feitas em novembro de 2026 no Crossref, no OpenAlex, no Google
+Scholar e nas páginas das editoras, com combinações dos termos \emph{smart
+waste}, \emph{smart bin}, \emph{fill level}, \emph{waste collection routing},
+\emph{IoT}, \emph{dynamic routing} e \emph{inventory routing}. Foram
+priorizados trabalhos que (i)~usam dados de nível de contêineres para decidir a
+coleta e (ii)~avaliam o efeito dessa decisão sobre distância, custo ou nível de
+serviço, com preferência para publicações de 2021 a 2026, sem descartar
+trabalhos clássicos. Os metadados de todas as referências foram conferidos no
+Crossref, no OpenAlex ou na página oficial. Para a maior parte dos trabalhos
+comparados, apenas o resumo estava acessível; a Tabela~\ref{tab:relacionados}
+registra somente o que consta nesses textos, e células sem informação são
+marcadas como ``n.i.''.
+
+\subsection{Panorama}
+
+Os primeiros estudos quantitativos sobre coleta guiada por sensores já
+comparavam políticas dinâmicas com rotas fixas. \cite{johansson2006effect}
+analisou \num{3300} contêineres de recicláveis com sensores de nível em Malmö,
+combinando modelo analítico e simulação de eventos discretos, e relatou
+reduções de custo, distância e horas de trabalho com escalonamento e
+roteirização dinâmicos. \cite{faccio2011waste} propuseram um modelo
+multiobjetivo que usa dados de rastreabilidade em tempo real (sensores
+volumétricos, RFID e GPS) e o avaliaram por simulação em uma cidade italiana.
+\cite{mes2014inventory} trataram a coleta de contêineres subterrâneos com
+sensores como um problema de roteamento de inventário e relataram reduções de
+custo de até 40\% com uma heurística antecipatória, cujos parâmetros foram
+ajustados por simulação.
+
+Na década seguinte, multiplicaram-se as propostas de roteirização dinâmica. Em
+\cite{anagnostopoulos2015robust}, o roteamento considera frota heterogênea e
+falhas de caminhões. \cite{akhtar2017backtracking} combinaram CVRP com um
+algoritmo de busca por retrocesso e um limiar de nível; o melhor desempenho
+ocorreu com limiares de 70\% a 75\%, com redução de \num{36,8}\% na distância.
+\cite{hannan2020waste} compararam rotas fixas e variáveis com limiar de 70\% e
+relataram ganhos de eficiência e reduções de custo e emissões.
+\cite{ramos2018smart} compararam abordagens operacionais para o problema de
+coleta inteligente com dados reais. Abordagens preditivas estimam o nível
+futuro dos contêineres para antecipar a coleta: \cite{ferrer2019bin} relataram
+rotas \num{33,2}\% mais curtas em uma cidade espanhola, e \cite{iosif2026optimizing}
+combinaram aprendizado de máquina de curto prazo com VRP dinâmico usando
+sensores reais e dados sintéticos.
+
+Trabalhos mais recentes deslocam a atenção para a integração entre dados e
+serviço. \cite{barth2023data} usaram 98 contêineres com sensores na Suíça para
+estudar a troca entre custo e qualidade de serviço e concluíram que reduções
+substanciais de custo são possíveis sem perda de qualidade.
+\cite{brouwer2023comparison} compararam formas de monitoramento e mostraram que
+a escolha afeta o número de coletas e de transbordamentos. Plataformas como as
+de \cite{lozano2018smart} e \cite{cardenasleon2024urban} enfatizam a
+infraestrutura de comunicação (LoRaWAN) e a visualização para gestores.
+A meta-análise de \cite{maciel2025impact}, com 11 estudos e 21 amostras,
+estimou redução média combinada de \num{21,51}\% na distância percorrida e
+mostrou que estudos de simulação relatam reduções cerca de três vezes maiores
+que as implantações reais.
+
+\begin{table}[ht]
+\centering
+\caption{Comparação de trabalhos relacionados (informações extraídas dos resumos, salvo indicação). n.i.: não informado.}
+\label{tab:relacionados}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.35cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.65cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Trabalho & Sensoriamento e dados & Comunicação & Avaliação e otimização & Limitações para nossa questão \\
+\midrule
+\cite{johansson2006effect} & nível em \num{3300} contêineres de recicláveis & sem fio (n.i.) & modelo analítico + simulação; políticas dinâmicas vs. rotas fixas & recicláveis; sem falhas de sensor \\
+\cite{faccio2011waste} & volume, RFID, GPS & GPRS & VRP multiobjetivo; simulação & ganhos não quantificados no resumo \\
+\cite{mes2014inventory} & contêineres subterrâneos com sensores & n.i. & roteamento de inventário; até $-40\%$ de custo & dependência do ajuste de parâmetros \\
+\cite{anagnostopoulos2015robust} & dados sintéticos e reais & n.i. & roteamento dinâmico robusto & falhas apenas de caminhão; avaliação qualitativa \\
+\cite{akhtar2017backtracking} & nível (limiar) & n.i. & CVRP + busca por retrocesso; $-36{,}8\%$ distância & horizonte de 4 dias; sem teste estatístico declarado \\
+\cite{ramos2018smart} & nível em tempo real & n.i. & três abordagens operacionais; caso real & ganho não quantificado no resumo \\
+\cite{lozano2018smart} & peso, volume, temperatura & LoRaWAN & rotas dinâmicas; plataforma & contexto rural \\
+\cite{ferrer2019bin} & histórico + previsão & n.i. & roteirização a partir de previsão; rotas $-33{,}2\%$ & um caso; comparação com rota da empresa \\
+\cite{hannan2020waste} & nível (limiar 70\%) & n.i. & programação linear inteira mista; rotas fixas vs. variáveis & sem incerteza de sensor ou comunicação \\
+\cite{barth2023data} & 98 contêineres (campo) & n.i. & troca custo $\times$ serviço & contexto suíço \\
+\cite{brouwer2023comparison} & ultrassom vs. observação visual & n.i. & coletas $\times$ transbordamentos & uma empresa \\
+\cite{iosif2026optimizing} & sensores reais + sintéticos & n.i. & previsão de curto prazo + VRP dinâmico & sem análise de falhas \\
+\cite{maciel2025impact} & --- & --- & meta-análise: $-21{,}5\%$ distância; simulação $-39{,}8\%$ vs. campo $-12{,}4\%$ & só distância; 11 estudos \\
+\midrule
+Este trabalho & ultrassom simulado com ruído, viés, falhas & MQTT 3.1.1 (broker real e canal emulado) & A, B, C, D pareadas; 30 sementes; fronteiras custo $\times$ serviço; falhas de telemetria & simulação; contêineres hipotéticos; demanda não calibrada em campo \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Lacuna e posicionamento}
+
+Os trabalhos analisados mostram ganhos consistentes quando a coleta passa a
+ser guiada por dados de nível, mas três aspectos aparecem pouco e raramente
+juntos nos textos consultados. O primeiro é a modelagem explícita das
+imperfeições da telemetria: perda de mensagens, leituras espúrias do
+ultrassom, sensores inoperantes e dados desatualizados. \cite{anagnostopoulos2015robust}
+tratam falhas de caminhões, não de sensores. O segundo é a comparação
+\emph{pareada} de políticas fixa, por limiar, dinâmica e preditiva sob as
+mesmas restrições de frota e de jornada, com números aleatórios comuns,
+réplicas e testes estatísticos com correção para comparações múltiplas. O
+terceiro é a disponibilidade de uma plataforma aberta que inclua a camada de
+telemetria e não apenas o otimizador.
+
+Este trabalho se posiciona nessa interseção, de forma incremental. Ele não
+propõe um novo algoritmo de roteirização: usa um resolvedor estabelecido e
+concentra a contribuição na arquitetura, na modelagem de falhas e no
+protocolo experimental. A pergunta implícita na meta-análise de
+\cite{maciel2025impact}, isto é, quanto do ganho reportado em simulação resiste a
+condições menos favoráveis, orientou o desenho dos experimentos E2 e E3. Como a
+busca não foi sistemática e vários trabalhos foram lidos apenas pelo resumo,
+não se afirma que essa combinação seja inédita.

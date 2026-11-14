@@ -1,0 +1,13 @@
+# Serviços locais da demonstração. Funciona com `docker compose` ou `podman compose`.
+services:
+  mosquitto:
+    image: docker.io/library/eclipse-mosquitto:2.0.20
+    container_name: residuos-mosquitto
+    ports:
+      - "127.0.0.1:1883:1883"   # apenas loopback
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro,Z
+      - mosquitto-data:/mosquitto/data
+    restart: unless-stopped
+volumes:
+  mosquitto-data:

@@ -1,0 +1,18 @@
+% Modelo geométrico do contêiner instrumentado
+\begin{tikzpicture}[font=\sffamily\scriptsize, >={Stealth[length=1.6mm]}]
+\def\W{3.2}\def\Hb{4.4}\def\off{0.4}\def\fl{1.9}
+\fill[brown!35] (0,0) -- (\W,0) -- (\W,\fl) .. controls (2.2,\fl+0.35) and (1.2,\fl-0.25) .. (0,\fl+0.1) -- cycle;
+\draw[thick] (0,\Hb) -- (0,0) -- (\W,0) -- (\W,\Hb);
+\draw[thick] (-0.15,\Hb) -- (\W+0.15,\Hb);
+\node[draw, fill=blue!15, minimum width=10mm, minimum height=3mm, inner sep=0] (s) at (\W/2,\Hb-0.15) {};
+\node[above=1mm of s] {HC-SR04};
+\fill[blue!8, opacity=.6] (\W/2-0.08,\Hb-0.3) -- (\W/2-0.08-0.55,1.95) -- (\W/2+0.08+0.55,2.05) -- (\W/2+0.08,\Hb-0.3) -- cycle;
+\node[blue!60!black] at (\W/2+0.95,3.0) {cone $\approx 15^\circ$};
+\draw[dashed, gray] (0,\Hb-\off) -- (\W,\Hb-\off);
+\draw[<->] (\W+0.5,0) -- node[right] {$D_0$} (\W+0.5,\Hb-0.3);
+\draw[<->] (\W+1.2,\Hb-0.3) -- node[right] {$\mathit{off}$} (\W+1.2,\Hb-\off);
+\draw[<->] (\W+1.2,0) -- node[right] {$H = D_0-\mathit{off}$} (\W+1.2,\Hb-\off);
+\draw[<->, red!70!black] (\W/2+0.15,\Hb-0.3) -- node[right] {$d$} (\W/2+0.15,2.08);
+\draw[<->] (-0.4,0) -- node[left, align=right] {altura\\ocupada\\$h$} (-0.4,\fl);
+\node[align=center] at (\W/2,0.7) {resíduos\\(superfície irregular)};
+\end{tikzpicture}

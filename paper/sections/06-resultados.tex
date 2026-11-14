@@ -1,0 +1,157 @@
+\section{Resultados e discussão}\label{sec:resultados}
+
+Todos os números desta seção são gerados pelos scripts de análise a partir dos
+arquivos brutos e inseridos no texto por macros; nenhum valor foi digitado à
+mão. Foram realizadas \NExecTotal{} execuções de simulação, com
+\NExecErros{} falhas de execução, totalizando \CPUhoras{} horas de
+processamento.
+
+\input{sections/06a-plataforma}
+
+\subsection{Comparação principal (E1)}\label{sec:e1}
+
+A Tabela~\ref{tab:e1} e a Figura~\ref{fig:e1} resumem o desempenho das cinco
+políticas nas três escalas. As comparações pareadas com A estão nas
+Tabelas~\ref{tab:e1km} e~\ref{tab:e1ov}.
+
+\begin{table}[ht]
+\centering
+\caption{E1 -- médias por política e escala (30 sementes; IC 95\% \emph{bootstrap} entre colchetes). ``Espera'': tempo médio entre o contêiner atingir 80\% e ser coletado.}
+\label{tab:e1}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\resizebox{\textwidth}{!}{\input{resultados/tab_e1.tex}}
+\end{table}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_e1.pdf}
+  \caption{E1 -- distância diária e transbordamento por política e escala (média e IC 95\%, 30 sementes).}
+  \label{fig:e1}
+\end{figure}
+
+\paragraph{Quando coletar (QP1).}
+Com os dados de nível, as políticas B e C coletam contêineres mais cheios:
+em $N = 100$, a ocupação verdadeira média na coleta foi de \FillNCemB\% (B) e
+\FillNCemC\% (C), contra \FillNCemA\% na coleta periódica, e as coletas com
+ocupação abaixo de 50\% caíram de \BelowNCemA\% (A) para \BelowNCemB\% (B) e
+\BelowNCemC\% (C). A distribuição completa (Figura~\ref{fig:hist}) mostra que A
+espalha as coletas por toda a faixa de ocupação, enquanto B as concentra
+acima de 75\%. A política preditiva ocupa uma posição intermediária
+(\FillNCemD\% de ocupação média; \BelowNCemD\% de coletas abaixo de 50\%):
+ela antecipa visitas a contêineres que provavelmente transbordariam antes da
+próxima oportunidade e, ao fazê-lo, aceita coletá-los mais vazios. Coletar
+mais cheio, portanto, não é sinônimo de coletar melhor: as políticas que mais
+elevam a ocupação na coleta são também as que mais deixam contêineres
+transbordar.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_hist_coleta.pdf}
+  \caption{Distribuição da ocupação verdadeira no momento da coleta ($N=100$; cinco sementes; 28 dias avaliados).}
+  \label{fig:hist}
+\end{figure}
+
+\paragraph{Diferenças operacionais (QP2).}
+Os resultados confirmam parcialmente as hipóteses pré-especificadas.
+\emph{H2a} se confirma: C percorreu menos que A em todas as escalas, com
+redução de \RelNVinteCvsAKm\%, \RelNCemCvsAKm\% e \RelNQuinhentosCvsAKm\% para
+20, 100 e 500 contêineres ($p_{\mathrm{Holm}}$ \PNCemCvsAKm{} em $N = 100$;
+$r_{rb} = -1$, isto é, menor distância em todas as 30 sementes). Mas essa
+economia veio acompanhada de transbordamento maior: \OvNCemC\% do volume
+gerado em C contra \OvNCemA\% em A ($N = 100$), uma diferença de
+\DifNCemCvsAOv{} pontos percentuais (IC 95\%: \LoNCemCvsAOv{} a
+\HiNCemCvsAOv). \emph{H2b} se confirma com folga: B transbordou
+\OvNCemB\% do volume em $N = 100$, cerca de quatro vezes o valor de A, e só
+visita contêineres que já estão perto do limite. O roteirizador também pesa:
+com o vizinho mais próximo e 2-opt, B percorreu \RelNCemBvsAKm\% e
+\RelNQuinhentosBvsAKm\% a mais que A em $N = 100$ e $N = 500$; com o OR-Tools
+(B-OR), a mesma seleção percorreu \RelNCemBORvsAKm\% e
+\RelNQuinhentosBORvsAKm\% em relação a A. Isso mostra que parte do ganho
+atribuído à ``coleta inteligente'' em comparações informais pode vir apenas da
+qualidade do roteirizador.
+
+\emph{H2c} também se confirma: D transbordou menos que C em todas as escalas
+(\OvNCemD\% contra \OvNCemC\% em $N = 100$; $p_{\mathrm{Holm}}$
+\PNCemDvsCOv) e percorreu mais (\RelNCemDvsCKm\%). O resultado mais
+relevante para a questão prática, porém, é a comparação com a linha de base:
+D percorreu \RelNCemDvsAKm\% e \RelNQuinhentosDvsAKm\% em relação a A, em
+$N = 100$ e $N = 500$, e ao mesmo tempo transbordou menos
+(\RelNCemDvsAOv\% e \RelNQuinhentosDvsAOv\%; $p_{\mathrm{Holm}}$
+\PNCemDvsAOv{} e \PNQuinhentosDvsAOv). Em $N = 20$, a redução de distância de
+D (\RelNVinteDvsAKm\%) foi significativa, mas a de transbordamento
+(\RelNVinteDvsAOv\%) não foi ($p_{\mathrm{Holm}} = $~\PNVinteDvsAOv). Com
+poucos contêineres espalhados pela cidade, cada visita exige deslocamentos
+longos, e a escolha de quais pontos visitar tem pouco efeito sobre a
+distância total.
+
+\begin{table}[ht]
+\centering
+\caption{E1 -- comparações pareadas de km/dia (alternativa $-$ referência; 30 pares; $r_{rb}$: correlação bisserial de postos; $p$ ajustado por Holm na família E1/km).}
+\label{tab:e1km}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e1_comp_km_per_day.tex}}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{E1 -- comparações pareadas de transbordamento (pontos percentuais do volume gerado; mesma estrutura da Tabela~\ref{tab:e1km}).}
+\label{tab:e1ov}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e1_comp_overflow_pct.tex}}
+\end{table}
+
+\subsection{Mesmo nível de serviço: fronteiras distância $\times$ transbordamento (E2)}\label{sec:e2}
+
+As comparações do E1 dependem dos parâmetros padrão de cada política: um
+limiar de 75\% em C é uma escolha, e não uma propriedade da política. O E2
+varia esses parâmetros e traça, para cada política, a curva de distância
+necessária para cada nível de transbordamento (Figura~\ref{fig:e2}).
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_e2.pdf}
+  \caption{E2 -- fronteiras distância $\times$ transbordamento ($N = 100$; 20 sementes por ponto; barras: IC 95\% nos dois eixos). Números junto aos pontos extremos: valor do parâmetro (ocupação-alvo $\gamma$ para A; limiar $\theta_{hi}$ para B-OR, C e D).}
+  \label{fig:e2}
+\end{figure}
+
+A curva de A fica acima das demais em toda a faixa em que há sobreposição:
+para manter o transbordamento em 1\% do volume gerado, A precisou, em média,
+de \KmAtUmA{}~km/dia, contra \KmAtUmD{}~km/dia em D, uma redução de
+\RelFrontUmDvsA\% (\NFrontUmDvsA{} sementes; $p_{\mathrm{Holm}}$
+\PFrontUmDvsA). Com 2\% de transbordamento, a redução foi de
+\RelFrontDoisCvsA\% para C e de \RelFrontDoisBORvsA\% para B-OR
+(Tabela~\ref{tab:e2}). Onde as curvas de C e D se sobrepõem, elas ficam
+próximas: com 2\%, D exigiu \RelFrontDoisDvsC\% de distância em relação a C
+(\NFrontDoisDvsC{} sementes em que ambos alcançam o nível). B-OR, que não usa
+contêineres opcionais, fica entre A e C.
+
+\begin{table}[ht]
+\centering
+\caption{E2 -- distância necessária no mesmo nível de transbordamento (interpolação por semente; diferença em km/dia). Comparações com menos de 20 pares correspondem a sementes em que uma das políticas não alcança o nível dentro da faixa varrida.}
+\label{tab:e2}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e2_comp.tex}}
+\end{table}
+
+Essa análise muda a leitura do E1. A diferença entre C e D no E1 não indica
+que a previsão seja necessária para obter ganhos; indica sobretudo que, com os
+parâmetros padrão, C opera em um ponto de mais transbordamento da fronteira e
+D em um ponto de menos. A vantagem robusta, observada em ambos, é a da seleção
+orientada por dados sobre o calendário fixo: para o mesmo nível de serviço,
+cerca de 10\% menos distância. A previsão serve, na prática, para alcançar
+níveis baixos de transbordamento (abaixo de 1\%) que C só atinge com limiares
+mais baixos e mais visitas. Esse valor, \RelFrontUmDvsA\%, é menor que os
+ganhos médios relatados por estudos de simulação na meta-análise de
+\cite{maciel2025impact} (cerca de 40\%) e próximo da média de implantações
+reais (cerca de 12\%). Uma explicação plausível é que a linha de base aqui
+é exigente: A tem frequências ajustadas contêiner a contêiner, com as taxas
+médias verdadeiras, e rotas otimizadas pelo mesmo resolvedor.
+
+\paragraph{Previsão.}
+O preditor de taxa usado por D teve erro absoluto médio de \PredNCemD{} (em
+fração do volume) para a ocupação 24~h à frente, contra \PersistNCemD{} da
+persistência, em $N = 100$. Os erros foram calculados apenas para contêineres
+sem coleta no intervalo e incluem o efeito do ruído de medição.
+
+\input{sections/06b-robustez}

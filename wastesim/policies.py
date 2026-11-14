@@ -2,8 +2,9 @@
 
 A — Periódica fixa. Cada contêiner recebe uma frequência p_i (dias) tal que o
     enchimento médio esperado na coleta seja ≈ ``periodic_target``, calculada
-    a partir da **taxa média de longo prazo verdadeira** (premissa otimista: um
-    planejador com histórico perfeito). As fases são distribuídas para
+    a partir da **taxa média de longo prazo verdadeira**, incluindo o valor
+    esperado dos descartes volumosos (premissa otimista: um planejador com
+    histórico perfeito). As fases são distribuídas para
     equilibrar a carga diária. Não usa telemetria. Visitas planejadas e não
     realizadas são reprogramadas para o dia seguinte. Rotas: OR-Tools.
 
@@ -78,7 +79,11 @@ class PolicyBase:
 class PeriodicPolicy(PolicyBase):
     def __init__(self, sim):
         super().__init__(sim)
-        mu = sim.demand.mu_l_day
+        # taxa média verdadeira de longo prazo, incluindo o valor esperado dos
+        # descartes volumosos (premissa de histórico perfeito); não inclui
+        # mudanças de regime futuras (E4), que um calendário fixo não antecipa
+        mu = sim.demand.mu_total_l_day
+        self.mu = mu
         target = self.cfg.periodic_target * sim.V
         self.period = np.clip(np.floor(target / mu), 1, self.cfg.periodic_max_days).astype(int)
         horizon = 420  # mmc(1..7)
@@ -97,7 +102,7 @@ class PeriodicPolicy(PolicyBase):
         due = ((day - self.phase) % self.period == 0) | self.pending
         idx = np.nonzero(due)[0]
         days_since = (now - sim.last_collect_true[idx]) / 86400 + 0.5
-        demand = sim.demand.mu_l_day[idx] * np.maximum(days_since, 0.5)
+        demand = self.mu[idx] * np.maximum(days_since, 0.5)
         pen = np.full(len(idx), BIG_PENALTY)
         plan = self._solve(idx, demand, pen, "ortools")
         self.pending[:] = False

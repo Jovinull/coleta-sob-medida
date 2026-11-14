@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coleta de RSU — Painel</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">◼</span>
+    <div><b>Coleta de RSU orientada por dados</b>
+      <small>Plataforma de simulação · malha viária de Aracaju-SE · contêineres hipotéticos</small></div>
+  </div>
+  <nav>
+    <button data-tab="live" class="active">Operação ao vivo</button>
+    <button data-tab="replay">Replay A × D</button>
+    <button data-tab="results">Resultados</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ======================= AO VIVO ======================= -->
+  <section id="tab-live" class="tab active">
+    <div class="mapwrap">
+      <canvas id="map-live"></canvas>
+      <div class="maplegend">
+        <span><i class="dot g"></i>&lt; 50%</span><span><i class="dot y"></i>50–75%</span>
+        <span><i class="dot o"></i>75–95%</span><span><i class="dot r"></i>≥ 95%</span>
+        <span><i class="dot s"></i>sem dado recente</span><span><i class="sq"></i>veículo</span>
+        <span><i class="dia"></i>depósito</span>
+      </div>
+      <div class="clock" id="clock-live">aguardando a simulação…</div>
+      <div class="attrib">Malha: © colaboradores do OpenStreetMap (ODbL)</div>
+    </div>
+    <aside>
+      <div class="kpis" id="kpis-live"></div>
+      <div class="toggle">
+        <label><input type="radio" name="view" value="estimado" checked> estado estimado (plataforma)</label>
+        <label><input type="radio" name="view" value="real"> estado verdadeiro (simulador)</label>
+      </div>
+      <div class="filters" id="filters">
+        <button data-f="todos" class="active">Todos</button>
+        <button data-f="alerta">Alerta</button>
+        <button data-f="cheio">≥ 75%</button>
+        <button data-f="desatualizado">Sem dado</button>
+        <button data-f="offline">Offline</button>
+      </div>
+      <div class="list" id="list-live"></div>
+      <div class="detail" id="detail-live"><p class="muted">Selecione um contêiner para ver o histórico de telemetria.</p></div>
+      <h4>Eventos recentes (MQTT)</h4>
+      <div class="events" id="events-live"></div>
+    </aside>
+  </section>
+
+  <!-- ======================= REPLAY ======================= -->
+  <section id="tab-replay" class="tab">
+    <div class="replay-ctl">
+      <button id="rp-play">▶ Reproduzir</button>
+      <input type="range" id="rp-slider" min="0" max="0" value="0">
+      <span id="rp-time">—</span>
+      <label>velocidade <select id="rp-speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label>
+    </div>
+    <div class="replay-grid">
+      <div><h3 id="rp-title-0">Política A</h3><canvas id="map-rp0"></canvas><div class="kpis small" id="rp-kpi-0"></div></div>
+      <div><h3 id="rp-title-1">Política D</h3><canvas id="map-rp1"></canvas><div class="kpis small" id="rp-kpi-1"></div></div>
+    </div>
+    <p class="muted" id="rp-note"></p>
+  </section>
+
+  <!-- ======================= RESULTADOS ======================= -->
+  <section id="tab-results" class="tab">
+    <div id="results-body"><p class="muted">Carregando…</p></div>
+  </section>
+</main>
+<script src="/static/app.js"></script>
+</body>
+</html>

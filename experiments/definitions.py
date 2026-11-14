@@ -45,13 +45,16 @@ def e2():
     for x in (0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
         runs += _runs("E2", {f"A_target={x}": {}},
                       [("A", deep_update(POLICIES["A"], {"policy": {"periodic_target": x}}))], SEEDS20)
-    for x in (0.5, 0.6, 0.7, 0.8, 0.9):
-        runs += _runs("E2", {f"B-OR_theta={x}": {}},
+    # Grade ampliada (emenda 1 ao protocolo, após revisão independente): os
+    # níveis 0,3 e 0,4 (B-OR, C) e 1,0 (D) foram acrescentados para que todas
+    # as políticas alcancem 1% e 2% de transbordamento em todas as sementes.
+    for x in (0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
+        runs += [] if x == 1.0 else _runs("E2", {f"B-OR_theta={x}": {}},
                       [("B-OR", deep_update(POLICIES["B-OR"], {"policy": {"theta_hi": x}}))], SEEDS20)
-        runs += _runs("E2", {f"C_theta={x}": {}},
+        runs += [] if x == 1.0 else _runs("E2", {f"C_theta={x}": {}},
                       [("C", deep_update(POLICIES["C"], {"policy": {"theta_hi": x, "theta_lo": round(x - 0.25, 2)}}))],
                       SEEDS20)
-        runs += _runs("E2", {f"D_theta={x}": {}},
+        runs += [] if x < 0.5 else _runs("E2", {f"D_theta={x}": {}},
                       [("D", deep_update(POLICIES["D"], {"policy": {"theta_hi": x, "theta_lo": round(x - 0.25, 2),
                                                                     "theta_crit": round(x + 0.2, 2)}}))],
                       SEEDS20)
@@ -99,7 +102,9 @@ def e4():
         "alta_variabilidade": {"demand": {"day_cv": 0.5, "step_cv": 2.0, "event_rate_per_day": 0.1}},
         "mudanca_regime_30%x1.6": {"demand": {"shift_day": 14, "shift_fraction": 0.3, "shift_factor": 1.6}},
         "surto_geral_x1.3": {"demand": {"shift_day": 14, "shift_fraction": 1.0, "shift_factor": 1.3}},
-        "frota_reduzida": {"fleet": {"target_utilization": 0.95}},
+        # emenda 1: a regra de utilização-alvo 0,95 resultava na mesma frota da
+        # base (2 veículos com N = 100); a frota reduzida é fixada em 1 veículo
+        "frota_reduzida": {"fleet": {"n_vehicles": 1}},
         "layout_agrupado": {"geo": {"layout": "clustered"}},
         "velocidade_15": {"fleet": {"speed_kmh": 15}},
         "velocidade_30": {"fleet": {"speed_kmh": 30}},
@@ -109,11 +114,12 @@ def e4():
 
 def e5():
     runs = []
-    for solver in ("greedy_descent", "gls"):
-        over = {"geo": {"n_containers": 500}, "policy": {"solver": solver, "solver_time_s": 5.0}}
+    # descida gulosa com salvaguarda de 30 s (como no E1); GLS limitada a 5 s
+    for solver, tl in (("greedy_descent", 30.0), ("gls", 5.0)):
+        over = {"geo": {"n_containers": 500}, "policy": {"solver": solver, "solver_time_s": tl}}
         rs = _runs("E5", {solver: over}, ["A", "C", "D"], SEEDS10)
         for r in rs:
-            r["cfg"] = deep_update(r["cfg"], {"policy": {"solver": solver, "solver_time_s": 5.0}})
+            r["cfg"] = deep_update(r["cfg"], {"policy": {"solver": solver, "solver_time_s": tl}})
         runs += rs
     return runs
 
