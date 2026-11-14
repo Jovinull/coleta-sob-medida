@@ -26,6 +26,36 @@ O projeto reúne:
 > credenciais Wi-Fi em texto claro; elas continuam no histórico do Git.
 > **Troque a senha dessa rede.** O código novo não contém credenciais.
 
+## Resultados principais (simulação; detalhes, IC 95% e testes no artigo)
+
+Cenário-base: 100 contêineres hipotéticos na malha de Aracaju, 30 sementes
+pareadas, 28 dias avaliados. A = periódica fixa (com taxas médias verdadeiras),
+B = limiar 75% (vizinho mais próximo + 2-opt), B-OR = limiar com OR-Tools,
+C = dinâmica com prêmios (OR-Tools), D = preditiva.
+
+| Política | km/dia | Transbordamento (% do volume) |
+|---|---:|---:|
+| A | 122,0 | 1,01 |
+| B | 121,7 | 5,79 |
+| B-OR | 100,1 | 5,77 |
+| C | 96,2 | 3,61 |
+| D | 112,2 | 0,92 (diferença para A não significativa) |
+
+- No **mesmo nível de serviço** (1% de transbordamento), C e D precisaram de
+  8,8% e 9,7% menos distância que A; a diferença entre C e D não foi
+  significativa.
+- Só trocar o roteirizador (B → B-OR) reduziu a distância em ~18%: parte do
+  ganho atribuído à "coleta inteligente" vem da roteirização.
+- Perda de até 50% das mensagens teve efeito pequeno; a estimativa por taxa
+  para dados desatualizados (*fallback*) foi decisiva sob falhas; **sensores
+  congelados** (não detectados pela ingestão) foram o pior modo de falha.
+- Com mudança de regime da demanda, D transbordou 2,6 p.p. menos que A.
+- Com frota insuficiente (1 veículo), nenhuma política evitou o transbordamento.
+- E6 (broker Mosquitto local): entrega de 100% com QoS 1 inclusive com
+  reinício do broker; LWT detectou as 10 quedas; 50/50 mensagens malformadas
+  rejeitadas. Lote e *live* coincidem quando o lote aplica o mesmo
+  arredondamento do payload MQTT (sem ele, uma decisão de limiar mudou).
+
 ## Estrutura
 
 ```text
@@ -53,7 +83,7 @@ serviço pago ou credencial é necessário.
 ```bash
 # 1. ambiente
 uv venv --python 3.12 .venv && source .venv/bin/activate
-uv pip install -e ".[dev]"          # dependências fixadas em requirements-lock.txt
+uv pip install -r requirements-lock.txt   # versões fixadas
 
 # 2. testes
 python -m pytest -q
@@ -64,6 +94,7 @@ scripts/broker.sh start             # ou: docker compose up -d mosquitto
 # 4. demonstração ao vivo (telemetria pelo broker) + painel
 python -m wastesim.live --n 80 --days 4 --policy D --step-wall 0.25 &
 uvicorn dashboard.app:app --port 8050   # abrir http://127.0.0.1:8050
+nohup setsid scripts/watchdog.sh >/dev/null 2>&1 &   # opcional: religa broker/painel se caírem
 
 # 5. experimentos (retomáveis; ~1–2 h com 5 processos)
 python -m experiments.run E1 E2 E3 E4 --workers 5

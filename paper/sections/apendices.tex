@@ -4,12 +4,12 @@ O repositório do projeto contém o código, os dados brutos e os scripts
 necessários para reproduzir todos os resultados. Com Python~3.12 e Docker ou
 Podman, a sequência é:
 
-\begin{small}
+\begin{footnotesize}
 \begin{verbatim}
 uv venv --python 3.12 .venv && source .venv/bin/activate
-uv pip install -e ".[dev]"            # versões fixadas em requirements-lock.txt
+uv pip install -r requirements-lock.txt   # versões fixadas
 python -m pytest -q                   # testes automatizados
-scripts/broker.sh start               # Mosquitto 2.0.20 em 127.0.0.1:1883
+scripts/broker.sh start      # Mosquitto 2.0.20, 127.0.0.1:1883
 python -m experiments.run E1 E2 E3 E4 --workers 5
 python -m experiments.run E5 --workers 3
 python -m experiments.mqtt_integration
@@ -18,7 +18,7 @@ python -m experiments.figures && python -m experiments.animations
 python scripts/verify_reproducibility.py
 scripts/build_paper.sh                # TeX Live 2026 em contêiner
 \end{verbatim}
-\end{small}
+\end{footnotesize}
 
 O executor grava uma linha por execução em \texttt{experiments/raw/E*.jsonl},
 com a configuração completa, a semente e as métricas, e pula execuções já

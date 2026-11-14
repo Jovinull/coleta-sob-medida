@@ -2,7 +2,7 @@
 # Gera referencias.bib e biblioteca.csv a partir de uma única fonte de dados.
 import csv, re, sys
 
-OUT = "/home/jovinull/Workspace/IoT-Gestao-Residuos-Solidos-Urbanos/paper/references/"
+OUT = str(__import__("pathlib").Path(__file__).resolve().parent.parent) + "/"
 ACESSO = "Acesso em: 14 nov. 2026"
 DA = "2026-11-14"
 

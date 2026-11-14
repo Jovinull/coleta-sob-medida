@@ -139,8 +139,8 @@ parâmetros, e os mais influentes são variados em E3 e E4.
 \centering
 \caption{Parâmetros principais e sua natureza (P: dado público; G: geográfico real; L: literatura; H: hipótese; S: sintético). Lista completa em \texttt{docs/parametros.md}.}
 \label{tab:parametros}
-\footnotesize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{3.6cm}c>{\raggedright\arraybackslash}X@{}}
+\scriptsize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{3.0cm}c>{\raggedright\arraybackslash}X@{}}
 \toprule
 Parâmetro & Valor-base & Nat. & Fonte ou justificativa \\
 \midrule
@@ -216,7 +216,7 @@ aquecimento elimina a influência do enchimento inicial (uniforme entre 0 e
   0,5, CV intradiário 2,0, descartes volumosos a cada 10 dias); mudança de
   regime (+60\% de geração em 30\% dos contêineres a partir do dia 14) e surto
   geral (+30\% em todos), ambos não antecipados pelo calendário de A nem pelo
-  dimensionamento da frota; frota reduzida (utilização-alvo 0,95); layout
+  dimensionamento da frota; frota reduzida a um veículo; layout
   agrupado; e velocidades de 15 e 30~km/h; 30 sementes (\NExecEQuatro{} execuções).
   \item[E5 -- resolvedor.] Descida gulosa $\times$ busca local guiada com
   limite de 5~s por dia, para A, C e D com 500 contêineres; 10 sementes
@@ -293,14 +293,40 @@ repositório. A descida gulosa do OR-Tools foi escolhida por ser determinística
 Uma amostra das execuções foi repetida com a versão final do código, como
 descrito na Seção~\ref{sec:resultados}.
 
+\paragraph{Desvio do protocolo.}
+Depois do início das rodadas definitivas, o código foi submetido a uma revisão
+independente, feita por um revisor que não participou da implementação. Ela
+encontrou quatro problemas, corrigidos antes da conclusão das rodadas e
+registrados em \texttt{docs/desvios-protocolo.md}. (i)~A política A usava a
+taxa média de geração sem os descartes volumosos (cerca de 3,5\% do volume no
+cenário-base), contrariando a premissa de histórico perfeito e desfavorecendo
+A; todas as execuções de A foram refeitas, e as anteriores foram arquivadas sem
+uso. (ii)~A grade de limiares do E2 não levava todas as políticas a atravessar
+1\% e 2\% de transbordamento, o que restringia a comparação no mesmo nível de
+serviço a um subconjunto não aleatório de sementes; foram acrescentados os
+níveis 0,3 e 0,4 (B-OR e C) e 1,0 (D). (iii)~A condição ``frota reduzida'' do
+E4 resultava na mesma frota da base e foi redefinida como um único veículo.
+(iv)~No E5, o limite de tempo de 5~s truncaria também a descida gulosa, que
+passou a usar a mesma salvaguarda de 30~s do E1. A revisão confirmou, por
+outro lado, a ausência de vazamento do estado verdadeiro para as políticas
+B--D, a validade dos números aleatórios comuns entre políticas e a correção
+das unidades do modelo de roteirização e dos procedimentos estatísticos.
+
 \paragraph{Ameaças à validade.}
 \emph{Interna}: os perfis de geração são hipóteses; o passo de 15~min
 discretiza os instantes de coleta; o resolvedor é heurístico, e diferenças de
 qualidade de rota podem se confundir com diferenças de política (mitigado pela
-variante B-OR e pelo E5). \emph{De construto}: o transbordamento é modelado
+variante B-OR e pelo E5); B e C estimam a carga dos veículos pelo nível
+observado no planejamento, e não pelo nível esperado na visita, o que lhes
+impõe mais desvios de descarga; a taxa inicial da ingestão é a mediana
+verdadeira das taxas, efeito restrito ao aquecimento descartado; e, na condição
+de amostragem a cada 15~min, os sorteios de ruído e falhas diferem dos da base,
+o que enfraquece o pareamento dessa condição. \emph{De construto}: o transbordamento é modelado
 como volume recusado, sem efeito sobre o tempo de atendimento; o limiar de
 50\% para ``coleta prematura'' é arbitrário, e por isso a distribuição completa
-da ocupação na coleta também é apresentada. \emph{Externa}: os contêineres e o
+da ocupação na coleta também é apresentada; a espera considera apenas
+episódios encerrados por coleta; e a disponibilidade de telemetria inclui
+leituras válidas que chegam atrasadas e são descartadas pela ingestão. \emph{Externa}: os contêineres e o
 depósito são hipotéticos; a velocidade é constante e não há trânsito; cada
 veículo tem uma viagem planejada por turno, com desvios de descarga apenas
 quando necessário; não há restrições de janela de horário; a política A usa

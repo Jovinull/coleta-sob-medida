@@ -1,1 +1,73 @@
-% provisório: 06a-plataforma
+\subsection{Verificação e reprodutibilidade}\label{sec:verificacao}
+
+Os \NTestes{} testes automatizados passam na versão usada nas rodadas. Em
+todas as execuções, o maior resíduo do balanço de volume foi de
+\BalancoMaxResidual{}~L. Para verificar a reprodutibilidade, uma amostra
+aleatória de \ReproN{} execuções (3\% de cada experimento, no mínimo três) foi
+repetida a partir das configurações gravadas. Em \ReproIdenticas{} delas,
+todas as métricas não temporais coincidiram com as originais, com tolerância
+relativa de $10^{-12}$. As execuções do E5 com busca local guiada ficaram fora
+da amostra, porque essa busca é interrompida por tempo de relógio e, por
+construção, não é determinística.
+
+\subsection{Integração com o broker MQTT (E6)}\label{sec:e6}
+
+O E6 verifica, com o \emph{broker} Mosquitto (\BrokerVersion) em execução
+local e o cliente Paho~\PahoVersion, se a cadeia de comunicação se comporta
+como o contrato da Seção~\ref{sec:arquitetura} prevê. Os testes usam
+dispositivos virtuais executados na mesma máquina. Eles medem a lógica de
+publicação, entrega e ingestão, e não o desempenho de uma rede sem fio
+urbana.
+
+\paragraph{Entrega e latência.}
+Cada repetição publica \MqttPubUm{} mensagens de 100 dispositivos, a cerca de
+\MqttRateUm{} mensagens por segundo. Com QoS~1, a menor taxa de entrega entre
+as três repetições foi de \MqttDelivUm\%, com latência mediana de
+\MqttLatMedUm{}~ms e percentil 99 de \MqttLatPNNUm{}~ms. Com QoS~0, os valores
+foram \MqttDelivZero\%, \MqttLatMedZero{}~ms e \MqttLatPNNZero{}~ms. Esses
+números refletem a comunicação local e servem como limite inferior de
+latência, não como estimativa de campo.
+
+\paragraph{Equivalência entre os modos.}
+Uma simulação de seis dias com 40 contêineres e a política D foi executada
+com a mesma semente em dois modos: em lote, com canal ideal, e no modo
+\emph{live}, em que todas as leituras passam pelo \emph{broker} real e pela
+mesma camada de ingestão. Os resultados \emph{não} foram idênticos. O modo
+\emph{live} fez \EquivVisLive{} visitas e registrou \EquivOvLive{}
+transbordamentos, contra \EquivVisLote{} e \EquivOvLote{} no modo em lote, e
+percorreu \EquivKmLive{} contra \EquivKmLote{}~km. A causa foi identificada
+e verificada. O contrato MQTT arredonda a distância e a ocupação a 0,1~cm e
+0,1\%, enquanto o modo em lote usa a leitura com precisão total. O
+arredondamento alterou uma decisão de limiar ao longo dos seis dias, e a
+diferença se propagou para as visitas seguintes. Repetida a execução em lote
+com o mesmo arredondamento do \emph{payload}, as cinco métricas comparadas
+(distância, visitas, volumes coletado e transbordado e número de
+transbordamentos) foram \EquivQuant{} às do modo \emph{live}. Portanto, a
+cadeia MQTT (publicação, \emph{broker}, assinatura, validação e ingestão) não
+introduz diferenças além da quantização prevista no contrato. As rodadas
+E1--E5 usam a precisão total. O efeito da quantização sobre os resultados
+agregados não foi medido. O arredondamento (até 0,05~cm) é muito menor que o
+ruído de medição (desvio-padrão de 1,5~cm), mas, como este teste mostra, pode
+alterar decisões individuais.
+
+\paragraph{Reinício do \emph{broker}.}
+O \emph{broker} foi reiniciado durante a publicação contínua de 100
+dispositivos (duração do reinício: cerca de \RestartDurUm{}~s). Com QoS~0,
+\RestartLostZero{} de \RestartPubZero{} publicações não chegaram à
+plataforma (entrega de \RestartDelivZero\%). Com QoS~1 e sessão persistente
+no assinante, perderam-se \RestartLostUm{} de \RestartPubUm{} (entrega de
+\RestartDelivUm\%), e \RestartReconUm{} dispositivos se reconectaram
+sozinhos. Nas publicações feitas com a conexão interrompida, o cliente
+retornou erro em \RestartPubFailUm{} chamadas com QoS~1. Mesmo assim, todas as
+mensagens chegaram, porque a biblioteca as manteve na fila e as enviou após a
+reconexão. A deduplicação por (\texttt{boot}, \texttt{seq}) não foi exigida
+nesse teste (\RestartDupUm{} duplicatas).
+
+\paragraph{Desconexão abrupta e mensagens inválidas.}
+Dez dispositivos foram encerrados sem desconexão normal. A plataforma recebeu
+a mensagem de \emph{Last Will} de \LwtDetected{} deles, em até \LwtTime{}~s,
+e um novo assinante encontrou \LwtRetained{} estados \emph{offline} retidos. Das
+\MalSent{} mensagens malformadas (JSON inválido, versão desconhecida,
+identificador divergente do tópico, campo obrigatório ausente e ocupação fora
+da faixa física), \MalRejected{} foram rejeitadas sem alterar o estado
+estimado.

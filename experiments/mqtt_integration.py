@@ -81,9 +81,13 @@ def t2_equivalence(seed=2024, n=40, days=6):
         lv = live._summarize()
     finally:
         live.close()
+    # lote com o mesmo arredondamento do payload MQTT (0,1 cm; 0,1 %)
+    batch_q = Simulation(ScenarioConfig.from_dict(base), quantize_payload=True).run()
     keys = ["km_total", "visits", "collected_m3", "overflow_m3", "overflow_events"]
-    return dict(batch={k: batch[k] for k in keys}, live={k: lv[k] for k in keys},
-                identical=all(abs(batch[k] - lv[k]) < 1e-9 for k in keys), live_info=info)
+    same = lambda a, b: all(abs(a[k] - b[k]) < 1e-9 for k in keys)  # noqa: E731
+    return dict(batch={k: batch[k] for k in keys}, batch_quantized={k: batch_q[k] for k in keys},
+                live={k: lv[k] for k in keys}, identical=same(batch, lv),
+                identical_quantized=same(batch_q, lv), live_info=info)
 
 
 def t3_restart(qos, n=100, seconds=30, rate_hz=300, restart_at=10):

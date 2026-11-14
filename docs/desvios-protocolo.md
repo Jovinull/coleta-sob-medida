@@ -41,3 +41,23 @@ Além disso, as famílias de Holm do E3 foram unificadas por métrica, como prev
 no protocolo (antes estavam divididas em "degradação" e "contra A"), e a
 comparação B-OR × B foi mantida no E1 como comparação adicional à lista
 pré-especificada.
+
+## Ocorrências durante a execução (14/11/2026)
+
+- **E5 interrompido.** O processo do E5 recebeu um sinal de término (SIGTERM, de
+  origem não identificada) após 54 das 60 execuções. As 6 restantes foram
+  executadas ao retomar pelo *checkpoint* (`experiments/raw/E5.jsonl`), com a
+  máquina ociosa. Como a GLS é limitada por tempo de relógio, as execuções GLS
+  dependem da carga da máquina; isso já excluía o E5/GLS da verificação de
+  reprodutibilidade.
+- **E6/T2: equivalência lote × *live*.** A comparação pré-especificada (lote
+  com canal ideal × modo *live* com broker real) **não** resultou em métricas
+  idênticas (89 × 90 visitas; 4 × 3 transbordamentos em 6 dias). A causa foi
+  isolada: o contrato MQTT arredonda distância e ocupação a 0,1 cm / 0,1 %, e o
+  lote usa precisão total; uma decisão de limiar mudou. Foi acrescentada ao
+  simulador a opção `quantize_payload` (padrão desligado; não afeta E1–E5) e uma
+  segunda comparação (lote com o mesmo arredondamento × *live*), que resultou
+  idêntica nas cinco métricas. O teste T2 foi reexecutado isoladamente depois
+  dessa alteração (campo `rerun_at` em `experiments/results/E6_mqtt.json`); os
+  demais testes do E6 são da execução original. O resultado negativo da
+  comparação original é relatado no artigo.

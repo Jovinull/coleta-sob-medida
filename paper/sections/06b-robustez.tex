@@ -1,1 +1,265 @@
-% provisório: 06b-robustez
+\subsection{Robustez a falhas de telemetria (E3)}\label{sec:e3}
+
+O E3 perturba um fator por vez no cenário-base ($N = 100$). A
+Tabela~\ref{tab:e3} mostra o transbordamento médio de cada política e a
+disponibilidade de telemetria, e a Figura~\ref{fig:e3} mostra as mesmas médias
+com seus intervalos. A política A não usa telemetria e serve de referência
+fixa. A Tabela~\ref{tab:e3deg} compara cada condição com a base, dentro de
+cada política.
+
+\begin{table}[ht]
+\centering
+\caption{E3 -- transbordamento médio por condição e disponibilidade de telemetria (leituras válidas entregues/leituras programadas, na política C). Última coluna: distância de D. 30 sementes por célula; $N = 100$.}
+\label{tab:e3}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e3.tex}}
+\end{table}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_e3.pdf}
+  \caption{E3 -- transbordamento por condição de telemetria (média e IC 95\%; 30 sementes; $N = 100$).}
+  \label{fig:e3}
+\end{figure}
+
+\paragraph{Perda de mensagens e interrupções.}
+Perdas independentes de 5\% e 20\% das mensagens não alteraram o
+transbordamento de forma detectável em nenhuma política. Mesmo com 50\% de
+perda, quando só metade das leituras chegou à plataforma, o efeito foi pequeno:
+\DifETdegradacaoPerdaCZBORvsBOROv{} p.p. em B-OR ($p_{\mathrm{Holm}} =$
+\PETdegradacaoPerdaCZBORvsBOROv), \DifETdegradacaoPerdaCZCvsCOv{} p.p. em C
+(não significativo) e \DifETdegradacaoPerdaCZDvsDOv{} p.p. em D. Com uma
+leitura por hora e decisões uma vez por dia, a plataforma tolera muitas
+lacunas: basta que alguma leitura recente chegue antes do planejamento. As
+interrupções regionais de 48~h, que deixam metade dos dispositivos sem
+comunicação, tiveram efeito maior em B-OR
+(+\DifETdegradacaoInterrupcaoQOHBORvsBOROv{} p.p.) e em C
+(+\DifETdegradacaoInterrupcaoQOHCvsCOv{} p.p.; ambos $p_{\mathrm{Holm}}$
+\PETdegradacaoInterrupcaoQOHCvsCOv), mas não em D
+(\DifETdegradacaoInterrupcaoQOHDvsDOv{} p.p.; $p_{\mathrm{Holm}} =$
+\PETdegradacaoInterrupcaoQOHDvsDOv).
+
+\paragraph{Estimativa para dados desatualizados (H3b).}
+O mecanismo de \emph{fallback}, que projeta a ocupação dos contêineres sem
+dado recente pela taxa de longo prazo, foi decisivo. Com 30\% dos sensores em
+falha permanente e o \emph{fallback} ativo, o transbordamento de C aumentou
+\DifETdegradacaoFalhaPermTZCvsCOv{} p.p. em relação à base. Sem ele, isto é,
+mantendo indefinidamente o último valor lido, o aumento foi de
+\DifETdegradacaoFalhaPermTZSemFallbackCvsCOv{} p.p.; em D, de
+\DifETdegradacaoFalhaPermTZDvsDOv{} p.p. com \emph{fallback} e
+\DifETdegradacaoFalhaPermTZSemFallbackDvsDOv{} p.p. sem ele. Nas interrupções
+de 48~h, desligar o \emph{fallback} elevou o aumento de C de
+\DifETdegradacaoInterrupcaoQOHCvsCOv{} para
+\DifETdegradacaoInterrupcaoQOHSemFallbackCvsCOv{} p.p. A hipótese H3b se
+confirma. Um contêiner que para de reportar continua a encher, e uma
+plataforma que trata o último valor lido como atual deixa de visitá-lo.
+
+\paragraph{Falhas que a plataforma não detecta.}
+Os sensores congelados (10\% dos dispositivos passam a repetir sempre a mesma
+leitura, a partir de um instante sorteado) foram a perturbação mais grave
+entre as de menor intensidade: +\DifETdegradacaoCongeladoUZBORvsBOROv{} p.p.
+em B-OR, +\DifETdegradacaoCongeladoUZCvsCOv{} p.p. em C e
++\DifETdegradacaoCongeladoUZDvsDOv{} p.p. em D. O transbordamento de D
+passou de valores próximos aos de A para cerca de cinco vezes o de A. Ao
+contrário do sensor que se cala, o sensor congelado continua a enviar
+mensagens válidas e recentes. O critério de desatualização não o identifica,
+e o \emph{fallback} não é acionado. A ingestão implementada não verifica se
+a ocupação permanece constante por tempo anormal. Essa verificação é simples
+e deve preceder qualquer uso operacional (Seção~\ref{sec:limitacoes}).
+
+\paragraph{Ruído e período de amostragem.}
+O resultado contrário à hipótese H3a veio do ruído. Eliminar todo o erro de
+medição \emph{aumentou} o transbordamento de B-OR, C e D
+(+\DifETdegradacaoRuidoZBORvsBOROv, +\DifETdegradacaoRuidoZCvsCOv{} e
++\DifETdegradacaoRuidoZDvsDOv{} p.p.), e triplicar ou sextuplicar o ruído o
+\emph{reduziu} (em C, \DifETdegradacaoRuidoTXCvsCOv{} e
+\DifETdegradacaoRuidoSXCvsCOv{} p.p.), ao custo de mais distância
+(Tabela~\ref{tab:e3}). O motivo está no modelo de medição
+(Seção~\ref{sec:metodologia}). O termo de superfície irregular sempre encurta
+a distância medida, porque o pulso reflete no pico da pilha. Por isso, ele
+desloca a ocupação observada para cima, em média cerca de 0,8 vez o seu
+desvio-padrão. Nas condições do E3, esse viés foi escalado junto com o ruído
+simétrico e funcionou como margem de segurança: o contêiner parece mais cheio
+do que está e é visitado antes. O E3, portanto, não separa o efeito do ruído
+simétrico do efeito do viés sistemático, o que fica como limitação do
+desenho. Em termos práticos, um limiar de 75\% sobre leituras enviesadas
+para cima equivale a um limiar menor sobre a ocupação verdadeira, e a
+calibração do sensor em campo altera o ponto de operação das políticas.
+
+O período de amostragem separou as políticas. Com uma leitura a cada 6~h, o
+transbordamento de C aumentou \DifETdegradacaoAmostraSHCvsCOv{} p.p.; com uma
+a cada 24~h, \DifETdegradacaoAmostraDQHCvsCOv{} p.p., e o de B-OR,
+\DifETdegradacaoAmostraDQHBORvsBOROv{} p.p. Em D, o aumento foi de
+\DifETdegradacaoAmostraDQHDvsDOv{} p.p. com amostragem diária, e com 6~h o
+transbordamento caiu (\DifETdegradacaoAmostraSHDvsDOv{} p.p.). As políticas
+que decidem pelo valor observado dependem de dados frequentes, porque o valor
+lido envelhece até o planejamento. A política que projeta a ocupação pela
+taxa estimada compensa boa parte desse envelhecimento. Amostrar a cada 15
+minutos, em vez de 1~h, não trouxe benefício relevante a nenhuma política.
+Isso interessa ao projeto do dispositivo, porque cada leitura transmitida
+consome energia.
+
+\begin{table}[ht]
+\centering
+\caption{E3 -- variação do transbordamento em relação à base, dentro de cada política (p.p. do volume gerado; 30 pares; Holm na família E3/transbordamento).}
+\label{tab:e3deg}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e3_deg_overflow_pct.tex}}
+\end{table}
+
+\subsection{Sensibilidade operacional (E4)}\label{sec:e4}
+
+O E4 varia a demanda, a frota, o arranjo espacial e a velocidade. A
+Figura~\ref{fig:e4} mostra, para cada condição, a diferença pareada de cada
+política em relação a A, e as Tabelas~\ref{tab:e4km} e~\ref{tab:e4ov} trazem
+os valores.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_e4.pdf}
+  \caption{E4 -- diferença pareada em relação a A por condição (média e IC 95\%; 30 sementes; $N = 100$). Esquerda: distância (\% de A); direita: transbordamento (pontos percentuais).}
+  \label{fig:e4}
+\end{figure}
+
+\paragraph{Mudança na demanda (H4).}
+A política A planeja o calendário com a taxa média verdadeira de cada
+contêiner, mas não acompanha mudanças posteriores. Quando 30\% dos
+contêineres passam a gerar 60\% a mais a partir do 14.º dia, o
+transbordamento médio de A sobe de \OvNCemA\% para cerca de 4\%. O de D
+sobe menos e fica \DifEQMudancaRegimeTZXUSDvsAOv{} p.p. em relação a A
+($p_{\mathrm{Holm}}$ \PEQMudancaRegimeTZXUSDvsAOv), com distância
+praticamente igual (\RelEQMudancaRegimeTZXUSDvsAKm\%). O mesmo padrão aparece
+no aumento geral de 30\% da demanda (\DifEQSurtoGeralXUTDvsAOv{} p.p.), agora
+com \RelEQSurtoGeralXUTDvsAKm\% de distância. C também se degrada menos que
+A nessas condições, mas parte de um transbordamento maior e continua acima
+dela. A hipótese H4 se confirma para mudanças de regime. É nelas que o
+componente preditivo mostra seu valor mais claro. Quando a intensidade muda
+desde o início e A a conhece (demanda $\times 0{,}7$ e $\times 1{,}3$), A
+mantém cerca de 1\% de transbordamento. Ainda assim, com demanda baixa, D
+reduziu ao mesmo tempo a distância (\RelEQDemandaZSeDvsAKm\%) e o
+transbordamento (\DifEQDemandaZSeDvsAOv{} p.p.), e as reduções de distância
+de C cresceram com a intensidade (\RelEQDemandaZSeCvsAKm\%,
+\RelEQBaseCvsAKm\% e \RelEQDemandaUTCvsAKm\% para $\times 0{,}7$, base e
+$\times 1{,}3$).
+
+\paragraph{Frota insuficiente.}
+Com um único veículo, a capacidade planejada (uma viagem de
+26.000~L por turno, pela regra de execução do modelo) fica abaixo do
+volume gerado por dia, e nenhuma política evita o transbordamento: A chegou a
+31\%, e as demais ficaram entre 18\% e 24\% (Tabela~\ref{tab:e4ov}). Nessa
+escassez, as políticas com telemetria transbordaram
+\DifEQFrotaReduzidaCvsAOv{} p.p. (C) e \DifEQFrotaReduzidaDvsAOv{} p.p. (D)
+em relação a A, porque priorizam os contêineres mais cheios. Em
+contrapartida, percorreram mais (\RelEQFrotaReduzidaCvsAKm\% e
+\RelEQFrotaReduzidaDvsAKm\%). Esse
+resultado não indica que a telemetria substitua frota. Indica que, quando a
+frota é insuficiente, os dados ajudam a decidir quem fica sem coleta.
+
+\paragraph{Arranjo espacial e velocidade.}
+Com contêineres agrupados em poucas áreas, todas as distâncias caem e D
+reduziu a distância (\RelEQLayoutAgrupadoDvsAKm\%) e o transbordamento
+(\DifEQLayoutAgrupadoDvsAOv{} p.p.) em relação a A. A velocidade do veículo
+(15 ou 30~km/h) praticamente não alterou as diferenças relativas. No
+cenário-base, a jornada de 8~h tem folga: em A, cada um dos dois veículos se
+desloca cerca de 3~h por dia a 20~km/h.
+
+\begin{table}[ht]
+\centering
+\caption{E4 -- comparações pareadas de km/dia por condição (alternativa $-$ referência; 30 pares; Holm na família E4/km).}
+\label{tab:e4km}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e4_km_per_day.tex}}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{E4 -- comparações pareadas de transbordamento (p.p. do volume gerado; Holm na família E4/transbordamento).}
+\label{tab:e4ov}
+\scriptsize
+\resizebox{\textwidth}{!}{\input{resultados/tab_e4_overflow_pct.tex}}
+\end{table}
+
+\subsection{Sensibilidade ao resolvedor (E5)}\label{sec:e5}
+
+Com 500 contêineres, a descida gulosa do OR-Tools levou em média
+\RefSolAT{}~s (A), \RefSolCT{}~s (C) e \RefSolDT{}~s (D) por planejamento
+diário. A busca local guiada (GLS), interrompida após 5~s, encontrou rotas
+mais curtas: a distância diária variou \RelSolAKm\% em A, \RelSolCKm\% em C e
+\RelSolDKm\% em D ($p_{\mathrm{Holm}}$: \PSolAKm, \PSolCKm{} e \PSolDKm; 10
+sementes). As diferenças são pequenas diante das diferenças entre políticas,
+e a ordem se manteve com os dois resolvedores: com GLS, C percorreu
+\AltSolCKm{}~km/dia, D \AltSolDKm{} e A \AltSolAKm. O transbordamento
+praticamente não mudou (diferenças de \DifSolAOv, \DifSolCOv{} e
+\DifSolDOv{}~p.p.). Como a melhoria do GLS foi um pouco maior em A, o uso da
+descida gulosa nas rodadas principais tende a favorecer levemente as
+políticas com telemetria, em menos de 1\% da distância de A. A escolha da
+descida gulosa, motivada pelo determinismo, não altera as conclusões.
+
+\subsection{Relação com a literatura}\label{sec:literatura}
+
+As reduções de distância medidas aqui são menores que as frequentemente
+relatadas por estudos de simulação. Com os parâmetros padrão, C percorreu
+cerca de 21\% menos que A, mas transbordou mais. No mesmo nível de serviço, a
+variação ficou entre \RelFrontUmCvsA\% e \RelFrontDoisCvsA\%. Duas escolhas de
+desenho explicam boa parte da diferença. A primeira é que a linha de base usa
+o mesmo resolvedor e frequências ajustadas por contêiner com taxas
+verdadeiras. Muitos estudos comparam a coleta inteligente com uma rota fixa
+pouco otimizada, o que mistura o efeito dos dados com o efeito da
+roteirização. O E1 mostrou que essa mistura é grande: em $N = 100$ e $N = 500$, só trocar
+o vizinho mais próximo pelo OR-Tools reduziu a distância de B em 17\% a 18\%. A
+segunda escolha é medir o transbordamento junto com a distância. Uma política
+que visita apenas contêineres acima de 75\% economiza distância, mas transfere
+o custo para o serviço. \cite{brouwer2023comparison} descrevem o mesmo
+compromisso entre número de coletas e número de transbordamentos. Os ganhos
+modestos e a importância das hipóteses sobre a demanda também são coerentes
+com a meta-análise de \cite{maciel2025impact}, em que os resultados de
+implantações reais ficam bem abaixo dos de simulações.
+
+\subsection{Implicações práticas}\label{sec:implicacoes}
+
+Para um município que avalie sensores de nível, os resultados sugerem cinco
+cuidados. Eles valem para o modelo estudado e precisam ser confirmados em
+campo.
+\begin{enumerate}
+  \item Comparar com uma linha de base bem roteirizada. Parte do ganho da
+        ``coleta inteligente'' pode ser obtida apenas com melhor roteirização
+        da coleta atual.
+  \item Fixar o nível de serviço antes de medir a economia. Reduções de
+        distância obtidas com mais transbordamento não são ganhos de
+        eficiência.
+  \item Tratar dados ausentes explicitamente. A estimativa por taxa para
+        contêineres sem dado recente foi a diferença entre degradação
+        pequena e falha grave.
+  \item Detectar sensores que continuam a reportar valores implausíveis
+        (constantes, por exemplo). Esse é o modo de falha mais perigoso
+        encontrado.
+  \item Não superdimensionar a frequência de amostragem: uma leitura por hora
+        foi suficiente, e a previsão compensou leituras ainda mais
+        espaçadas.
+\end{enumerate}
+O valor dos dados aparece mais claramente quando a demanda muda e o calendário
+fixo fica defasado, situação comum em áreas de crescimento urbano, eventos e
+sazonalidade turística.
+
+\subsection{Limitações}\label{sec:limitacoes}
+
+Os resultados valem para o modelo e os parâmetros descritos. Os perfis de
+geração, a heterogeneidade entre contêineres e os descartes volumosos são
+hipóteses de cenário e não foram calibrados com medições de campo. As
+posições dos contêineres e do depósito são hipotéticas, e os resultados não
+descrevem o serviço real de Aracaju. O veículo percorre a malha a velocidade
+constante, sem trânsito, e cada veículo faz uma rota planejada por turno, com
+desvios ao depósito apenas quando a carga excede a capacidade. Por isso, o
+cenário de frota reduzida mede sobretudo a restrição de capacidade. O
+transbordamento é modelado como volume recusado, sem efeitos sobre os
+contêineres vizinhos ou sobre o comportamento da população. O E3 não separa o
+ruído simétrico do viés da superfície irregular, e os fatores do E3 e do E4
+foram variados um de cada vez, sem estimar interações. O resolvedor é
+heurístico, e a qualidade das rotas pode variar com o tamanho da instância
+(Seção~\ref{sec:e5}). A plataforma não detecta sensores congelados. O
+firmware foi compilado, mas não executado em hardware, e a integração MQTT
+foi verificada com dispositivos virtuais em \emph{broker} local, não em rede
+celular ou Wi-Fi urbana. Por fim, a política A recebe as taxas médias
+verdadeiras, um planejador que nenhum município possui. Uma linha de base
+estimada com histórico real tenderia a ser pior, e as diferenças em relação a
+ela seriam maiores. Esse efeito não foi quantificado.

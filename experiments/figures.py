@@ -19,6 +19,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
 
+from experiments.labels import plain as cond_plain  # noqa: E402
 from wastesim import sensor as S  # noqa: E402
 from wastesim.config import ContainerCfg, ScenarioConfig  # noqa: E402
 from wastesim.demand import PROFILES  # noqa: E402
@@ -289,7 +290,7 @@ def fig_e2():
             ax.errorbar(r.ov_mean, r.km_mean, xerr=[[r.ov_mean - r.ov_lo], [r.ov_hi - r.ov_mean]],
                         yerr=[[r.km_mean - r.km_lo], [r.km_hi - r.km_mean]], fmt=MRK[pol], color=COL[pol],
                         ms=5, capsize=2, elinewidth=0.9, mec="white", mew=0.5, zorder=3)
-        for _, r in (g.iloc[[0, -1]]).iterrows():
+        for _, r in (g.iloc[[0, -1]] if pol == "A" else g.iloc[[-1]]).iterrows():
             ax.annotate(f"{r.level:g}".replace(".", ","), (r.ov_mean, r.km_mean), xytext=(4, 3),
                         textcoords="offset points", fontsize=6.5, color=MUTED)
     ax.axvline(1.0, color=MUTED, lw=0.7, ls=":")
@@ -320,9 +321,9 @@ def fig_e3():
                 ax.errorbar(m, yy + (k - 1.5) * 0.17, xerr=[[m - lo], [hi - m]], fmt=MRK[pol], color=COL[pol],
                             ms=4.5, capsize=1.5, elinewidth=0.9, mec="white", mew=0.4,
                             label=pol if yy == y[0] else None)
-    ax.set_yticks(y, [c.replace("_", " ") for c in conds], fontsize=7.5)
+    ax.set_yticks(y, [cond_plain(c) for c in conds], fontsize=7.5)
     ax.set_xlabel("transbordamento (% do volume gerado), média e IC 95%")
-    ax.legend(frameon=False, ncol=4, loc="lower right")
+    ax.legend(frameon=False, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 1.0), handletextpad=0.3)
     ax.set_xlim(left=0)
     comma(ax, "x")
     save(fig, "fig_e3")
@@ -352,9 +353,10 @@ def fig_e4():
         ax.axvline(0, color=INK, lw=0.8)
         ax.set_xlabel(lab)
         comma(ax, "x")
-    axs[0].set_yticks(y, [x.replace("_", " ") for x in conds], fontsize=7.5)
-    axs[1].legend(frameon=False, loc="lower right")
-    fig.tight_layout()
+    axs[0].set_yticks(y, [cond_plain(c) for c in conds], fontsize=7.5)
+    h, lb = axs[0].get_legend_handles_labels()
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.legend(h, lb, frameon=False, ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.0), handletextpad=0.3)
     save(fig, "fig_e4")
 
 

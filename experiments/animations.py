@@ -203,7 +203,7 @@ def anim_C():
         _replay_update(R, run, k, *art)
         q = run["kpi"][k]
         ttl.set_text(f"Política D (preditiva) — {hhmm(R['frames_t'][k])}\n"
-                     f"{q[0]:.0f} km · {q[1]} coletas · {q[2]:.1f} m³ transbordados")
+                     f"{q[0]:.0f} km · {q[1]} coletas · {f'{q[2]:.1f}'.replace('.', ',')} m³ transbordados")
         return art
 
     save(FuncAnimation(fig, upd, frames=range(len(R["frames_t"]))), "C_coleta_veiculos", 8)
@@ -227,7 +227,7 @@ def anim_D():
             _replay_update(R, run, k, *art)
             q = run["kpi"][k]
             tt.set_text(f"{run['policy']} — {run['label']}\n{q[0]:.0f} km · {q[1]} coletas · "
-                        f"{q[2]:.1f} m³ transb. · {q[3]} cheios")
+                        f"{f'{q[2]:.1f}'.replace('.', ',')} m³ transb. · {q[3]} cheios")
         sup.set_text(f"Comparação sincronizada — {hhmm(R['frames_t'][k])}")
         return arts
 
@@ -250,7 +250,7 @@ def anim_E():
         ax.set_title(title)
     ring = axs[1].scatter(lon[aff], lat[aff], s=60, facecolors="none", edgecolors="#d23b3b", lw=0.0, zorder=4)
     sup = fig.suptitle("")
-    fig.text(0.5, 0.01, "Política C; interrupção regional de 48 h em 50% dos dispositivos (dias 10–11). "
+    fig.text(0.5, 0.01, "Política C; interrupção regional de 48 h em 50% dos dispositivos (dias 10–11).\n"
              "Círculos brancos: sem dado há mais de 24 h. Contorno vermelho: dispositivos na área sem conectividade.",
              ha="center", fontsize=7, color=MUTED)
     fig.tight_layout(rect=(0, 0.04, 1, 0.92))
@@ -263,7 +263,7 @@ def anim_E():
         ring.set_linewidth(1.0 if on else 0.0)
         q = z["kpi"][k]
         sup.set_text(f"{hhmm(t[k])} — {'INTERRUPÇÃO ATIVA' if on else 'rede normal'} — "
-                     f"{int(stale[k].sum())} contêineres sem dado recente — {q[2]:.1f} m³ transbordados (acum.)")
+                     f"{int(stale[k].sum())} contêineres sem dado recente — {f'{q[2]:.1f}'.replace('.', ',')} m³ transbordados (acum.)")
         return scs
 
     save(FuncAnimation(fig, upd, frames=keep[::1]), "E_falha_comunicacao", 8)

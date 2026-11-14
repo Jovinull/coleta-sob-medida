@@ -41,7 +41,7 @@ estatísticas.
 
 \begin{figure}[ht]
   \centering
-  \input{tikz/arquitetura}
+  \resizebox{\linewidth}{!}{\input{tikz/arquitetura}}
   \caption{Arquitetura da plataforma. Setas contínuas: fluxo de dados; setas
   tracejadas: efeito das coletas executadas sobre o estado dos contêineres e
   registro para avaliação.}
@@ -146,6 +146,7 @@ conexão, publicação e queda abrupta.
 \caption{Tópicos do contrato MQTT (esquema versão 1).}
 \label{tab:topicos}
 \footnotesize
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{@{}llccl@{}}
 \toprule
 Sufixo & Sentido & QoS & Retido & Conteúdo \\
@@ -155,7 +156,7 @@ Sufixo & Sentido & QoS & Retido & Conteúdo \\
 \texttt{eventos} & dispositivo $\to$ plataforma & 0/1 & não & limiar, falha de sensor, reinício \\
 \texttt{comandos} & plataforma $\to$ dispositivo & 1 & não & intervalo, LED, \emph{ping} \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \begin{figure}[ht]
@@ -171,13 +172,15 @@ não volátil (\texttt{boot}), número de sequência (\texttt{seq}), instante da
 medição (\texttt{ts}), origem do relógio (\texttt{ts\_src}) e uma lista de
 leituras, cada uma com tipo, valor, unidade e validade:
 
-\begin{small}
+\begin{footnotesize}
 \begin{verbatim}
-{"v":1, "id":"LX-0007", "boot":4, "seq":1532, "ts":1731580000, "ts_src":"ntp",
- "leituras":[{"tipo":"distancia","valor":31.2,"unidade":"cm","valida":true},
-             {"tipo":"ocupacao","valor":78.8,"unidade":"%","valida":true}]}
+{"v":1, "id":"LX-0007", "boot":4, "seq":1532,
+ "ts":1731580000, "ts_src":"ntp",
+ "leituras":[
+   {"tipo":"distancia","valor":31.2,"unidade":"cm","valida":true},
+   {"tipo":"ocupacao","valor":78.8,"unidade":"%","valida":true}]}
 \end{verbatim}
-\end{small}
+\end{footnotesize}
 
 O par (\texttt{boot}, \texttt{seq}) identifica unicamente cada mensagem de um
 dispositivo, o que permite descartar duplicatas geradas por reentregas com

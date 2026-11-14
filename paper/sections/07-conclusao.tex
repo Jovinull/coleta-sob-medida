@@ -1,1 +1,84 @@
-% provisório: 07-conclusao
+\section{Conclusão}\label{sec:conclusao}
+
+Este trabalho retomou o protótipo de 2024, que mede a ocupação de uma lixeira
+com sensor ultrassônico e ESP32 e publica os dados por MQTT, e o transformou
+em um estudo experimental da questão que o motivava: se esses dados tornam a
+coleta mais eficiente. O firmware foi auditado e reescrito, a comunicação foi
+especificada em um contrato MQTT, e a decisão de coleta foi avaliada por
+simulação pareada sobre a malha viária de Aracaju, com contêineres
+hipotéticos. As respostas às questões de pesquisa, válidas para o modelo e os
+parâmetros adotados, são as seguintes.
+
+\paragraph{QP1 -- quando coletar.}
+Os dados de nível permitem coletar contêineres mais cheios. A coleta por
+limiar elevou a ocupação média na coleta de \FillNCemA\% para \FillNCemB\%
+e praticamente eliminou as coletas abaixo de 50\% de ocupação. Coletar mais
+cheio, porém, significa chegar mais perto do limite. A decisão útil não é
+``coletar quando estiver cheio'', mas ``coletar antes que transborde''. A
+política preditiva implementa essa segunda regra com uma projeção pela taxa
+de enchimento estimada.
+
+\paragraph{QP2 -- diferenças operacionais.}
+Com os parâmetros padrão, as políticas com telemetria percorreram menos que a
+coleta periódica, mas a maior parte da economia veio acompanhada de mais
+transbordamento. A política dinâmica (C) percorreu \RelNCemCvsAKm\% e
+transbordou \OvNCemC\% do volume, contra \OvNCemA\% em A. A preditiva (D)
+percorreu \RelNCemDvsAKm\% sem piora detectável do transbordamento. No mesmo
+nível de serviço (1\% de transbordamento), a seleção orientada por dados
+exigiu de \RelFrontUmCvsA\% (C) a \RelFrontUmDvsA\% (D) de distância em
+relação a A, sem diferença significativa entre C e D. Parte do ganho
+frequentemente atribuído aos sensores vem da roteirização: a mesma seleção
+por limiar percorreu cerca de 18\% menos com o OR-Tools do que com o vizinho
+mais próximo.
+
+\paragraph{QP3 -- falhas de telemetria.}
+A perda de mensagens teve efeito pequeno mesmo em níveis altos, porque as
+decisões são diárias e as leituras, horárias. Interrupções regionais, falhas
+permanentes e amostragem espaçada prejudicaram as políticas que decidem pelo
+valor observado. A estimativa por taxa para dados desatualizados evitou a
+maior parte dessa degradação. O modo de falha mais grave foi o sensor
+congelado, que continua a enviar leituras válidas e não é detectado pela
+ingestão implementada. O ruído de medição teve efeito contrário ao esperado,
+explicado pelo viés para cima do modelo de superfície irregular.
+
+\paragraph{QP4 -- escala, demanda e frota.}
+As reduções relativas de distância foram semelhantes em 20 e 100 contêineres
+e menores em 500. A vantagem da política preditiva sobre o calendário fixo
+cresceu quando a demanda mudou depois do planejamento: com aumento de 60\% em
+30\% dos contêineres, A passou de cerca de 1\% para 4\% de transbordamento, e
+o transbordamento de D variou \DifEQMudancaRegimeTZXUSDvsAOv{} p.p. em relação ao de A, com distância
+praticamente igual. Com frota insuficiente, nenhuma política evitou o
+transbordamento. Os dados apenas redistribuíram a falta de capacidade.
+
+\paragraph{QP5 -- quando os dados não compensam.}
+Os ganhos encolheram quando a comparação foi feita com uma linha de base bem
+roteirizada e no mesmo nível de serviço. Nessas condições, a redução de
+distância ficou entre 9\% e 11\%, contra cerca de 21\% de C com os parâmetros
+padrão, obtidos à custa de transbordamento. Esses 9\% a 11\% ficam abaixo dos
+ganhos relatados por muitos estudos de simulação e próximos da média de
+implantações reais na meta-análise de \cite{maciel2025impact}. Os dados
+pioraram o resultado em dois casos. Com 10\% de sensores congelados, não
+detectados, a política preditiva transbordou cerca de cinco vezes mais que a
+periódica. Com frota insuficiente, as políticas com telemetria transbordaram
+menos, mas percorreram mais. Os dados compensaram mais claramente quando a
+demanda mudou de forma não prevista pelo calendário.
+
+\paragraph{Limites das conclusões.}
+Nada aqui mostra que a coleta inteligente funcione em Aracaju ou em outra
+cidade. Os resultados dependem de perfis de geração não calibrados, de
+posições hipotéticas e de um modelo de operação simplificado
+(Seção~\ref{sec:limitacoes}). O que o trabalho oferece é uma plataforma
+aberta e reprodutível em que essas hipóteses podem ser trocadas por dados
+reais, e um conjunto de cuidados metodológicos que reduzem o risco de
+superestimar os ganhos.
+
+\paragraph{Trabalhos futuros.}
+Em ordem de prioridade: (i)~calibrar o modelo de demanda com medições de
+contêineres reais, em parceria com o serviço municipal; (ii)~montar e testar
+o firmware revisado em hardware, medindo consumo de energia e alcance de
+comunicação; (iii)~implementar a detecção de sensores congelados e de
+leituras implausíveis; (iv)~separar, no modelo de medição, o ruído simétrico
+do viés de superfície e calibrá-los com ensaios do sensor; (v)~estimar a
+linha de base periódica com histórico ruidoso em vez das taxas verdadeiras; e
+(vi)~incluir múltiplas viagens por turno, janelas de tempo e trânsito no
+modelo de operação.

@@ -1,0 +1,51 @@
+\begin{tabular}{@{}llrcrrr@{}}
+\toprule
+Condição & Comparação & Dif. média & IC 95\% & Dif. (\%) & $r_{rb}$ & $p$ (Holm) \\
+\midrule
+perda 5\% & \polBOR{} (cond. $-$ base) & $-$0,02 & [$-$0,09; 0,04] & $-$0,4 & $-$0,11 & 1,000 \\
+perda 20\% & \polBOR{} (cond. $-$ base) & 0,05 & [$-$0,02; 0,13] & 0,9 & 0,28 & 1,000 \\
+perda 50\% & \polBOR{} (cond. $-$ base) & 0,25 & [0,15; 0,34] & 4,3 & 0,79 & 0,001 \\
+interrupção 48 h & \polBOR{} (cond. $-$ base) & 0,59 & [0,41; 0,79] & 10,2 & 0,95 & $<$0,001 \\
+sem ruído & \polBOR{} (cond. $-$ base) & 0,78 & [0,67; 0,89] & 13,6 & 1,00 & $<$0,001 \\
+ruído $\times$3 & \polBOR{} (cond. $-$ base) & $-$1,16 & [$-$1,25; $-$1,07] & $-$20,1 & $-$1,00 & $<$0,001 \\
+ruído $\times$6 & \polBOR{} (cond. $-$ base) & $-$2,21 & [$-$2,31; $-$2,10] & $-$38,2 & $-$1,00 & $<$0,001 \\
+falha permanente 10\% & \polBOR{} (cond. $-$ base) & 0,24 & [0,14; 0,34] & 4,2 & 0,78 & 0,002 \\
+falha permanente 30\% & \polBOR{} (cond. $-$ base) & 0,55 & [0,42; 0,68] & 9,5 & 0,97 & $<$0,001 \\
+congelados 10\% & \polBOR{} (cond. $-$ base) & 3,94 & [3,49; 4,39] & 68,2 & 1,00 & $<$0,001 \\
+amostragem 15 min & \polBOR{} (cond. $-$ base) & $-$0,23 & [$-$0,34; $-$0,11] & $-$3,9 & $-$0,71 & 0,008 \\
+amostragem 6 h & \polBOR{} (cond. $-$ base) & 2,02 & [1,88; 2,15] & 35,0 & 1,00 & $<$0,001 \\
+amostragem 24 h & \polBOR{} (cond. $-$ base) & 21,48 & [21,22; 21,73] & 372,4 & 1,00 & $<$0,001 \\
+falha perm. 30\%, sem \emph{fallback} & \polBOR{} (cond. $-$ base) & 15,22 & [14,30; 16,18] & 240,8 & 1,00 & $<$0,001 \\
+interrupção 48 h, sem \emph{fallback} & \polBOR{} (cond. $-$ base) & 2,91 & [2,37; 3,46] & 45,7 & 1,00 & $<$0,001 \\
+perda 5\% & \polC{} (cond. $-$ base) & 0,03 & [$-$0,05; 0,12] & 0,8 & 0,05 & 1,000 \\
+perda 20\% & \polC{} (cond. $-$ base) & 0,00 & [$-$0,08; 0,08] & $-$0,1 & $-$0,09 & 1,000 \\
+perda 50\% & \polC{} (cond. $-$ base) & 0,16 & [0,04; 0,27] & 4,3 & 0,48 & 0,375 \\
+interrupção 48 h & \polC{} (cond. $-$ base) & 0,45 & [0,31; 0,58] & 12,4 & 0,95 & $<$0,001 \\
+sem ruído & \polC{} (cond. $-$ base) & 0,58 & [0,47; 0,70] & 16,1 & 0,99 & $<$0,001 \\
+ruído $\times$3 & \polC{} (cond. $-$ base) & $-$0,81 & [$-$0,90; $-$0,72] & $-$22,5 & $-$1,00 & $<$0,001 \\
+ruído $\times$6 & \polC{} (cond. $-$ base) & $-$1,47 & [$-$1,54; $-$1,39] & $-$40,7 & $-$1,00 & $<$0,001 \\
+falha permanente 10\% & \polC{} (cond. $-$ base) & 0,18 & [0,07; 0,28] & 4,9 & 0,57 & 0,095 \\
+falha permanente 30\% & \polC{} (cond. $-$ base) & 0,47 & [0,37; 0,57] & 13,0 & 0,99 & $<$0,001 \\
+congelados 10\% & \polC{} (cond. $-$ base) & 3,28 & [2,69; 3,91] & 90,7 & 1,00 & $<$0,001 \\
+amostragem 15 min & \polC{} (cond. $-$ base) & $-$0,13 & [$-$0,24; $-$0,02] & $-$3,6 & $-$0,45 & 0,469 \\
+amostragem 6 h & \polC{} (cond. $-$ base) & 1,51 & [1,38; 1,64] & 41,9 & 1,00 & $<$0,001 \\
+amostragem 24 h & \polC{} (cond. $-$ base) & 17,13 & [16,81; 17,43] & 474,5 & 1,00 & $<$0,001 \\
+falha perm. 30\%, sem \emph{fallback} & \polC{} (cond. $-$ base) & 15,31 & [14,36; 16,30] & 375,3 & 1,00 & $<$0,001 \\
+interrupção 48 h, sem \emph{fallback} & \polC{} (cond. $-$ base) & 2,51 & [2,02; 3,05] & 62,0 & 1,00 & $<$0,001 \\
+perda 5\% & \polD{} (cond. $-$ base) & $-$0,02 & [$-$0,06; 0,03] & $-$1,8 & $-$0,10 & 1,000 \\
+perda 20\% & \polD{} (cond. $-$ base) & $-$0,04 & [$-$0,09; 0,01] & $-$4,5 & $-$0,30 & 1,000 \\
+perda 50\% & \polD{} (cond. $-$ base) & $-$0,09 & [$-$0,14; $-$0,04] & $-$9,7 & $-$0,66 & 0,024 \\
+interrupção 48 h & \polD{} (cond. $-$ base) & $-$0,01 & [$-$0,06; 0,03] & $-$1,6 & $-$0,13 & 1,000 \\
+sem ruído & \polD{} (cond. $-$ base) & 0,10 & [0,05; 0,14] & 10,3 & 0,70 & 0,010 \\
+ruído $\times$3 & \polD{} (cond. $-$ base) & $-$0,18 & [$-$0,22; $-$0,14] & $-$19,7 & $-$0,96 & $<$0,001 \\
+ruído $\times$6 & \polD{} (cond. $-$ base) & $-$0,28 & [$-$0,33; $-$0,23] & $-$30,1 & $-$0,99 & $<$0,001 \\
+falha permanente 10\% & \polD{} (cond. $-$ base) & 0,02 & [$-$0,02; 0,06] & 2,3 & 0,14 & 1,000 \\
+falha permanente 30\% & \polD{} (cond. $-$ base) & 0,13 & [0,07; 0,19] & 13,6 & 0,77 & 0,002 \\
+congelados 10\% & \polD{} (cond. $-$ base) & 4,15 & [3,46; 4,88] & 448,7 & 1,00 & $<$0,001 \\
+amostragem 15 min & \polD{} (cond. $-$ base) & 0,01 & [$-$0,04; 0,06] & 0,9 & 0,06 & 1,000 \\
+amostragem 6 h & \polD{} (cond. $-$ base) & $-$0,24 & [$-$0,28; $-$0,19] & $-$25,5 & $-$1,00 & $<$0,001 \\
+amostragem 24 h & \polD{} (cond. $-$ base) & 1,57 & [1,32; 1,84] & 169,5 & 1,00 & $<$0,001 \\
+falha perm. 30\%, sem \emph{fallback} & \polD{} (cond. $-$ base) & 12,03 & [11,10; 12,90] & 1.145,3 & 1,00 & $<$0,001 \\
+interrupção 48 h, sem \emph{fallback} & \polD{} (cond. $-$ base) & 1,10 & [0,82; 1,40] & 120,6 & 1,00 & $<$0,001 \\
+\bottomrule
+\end{tabular}

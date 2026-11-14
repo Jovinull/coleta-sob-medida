@@ -102,3 +102,11 @@ volume recusado; "coleta prematura" depende do limiar de 50%. Externa:
 posições de contêineres e depósito hipotéticos; velocidade constante, sem
 trânsito; uma viagem planejada por veículo e turno (com desvios de descarga).
 Conclusão: comparações múltiplas (Holm), pareamento por semente.
+
+## Emenda 1 (14/11/2026)
+
+Após revisão independente do código, durante as rodadas: política A passou a
+usar a taxa média verdadeira com descartes volumosos (todas as execuções de A
+refeitas); E2 com níveis adicionais (θ = 0,3 e 0,4 para B-OR e C; θ = 1,0 para
+D); E4 "frota reduzida" = 1 veículo; E5 com descida gulosa sem truncamento
+(30 s). Detalhes e itens não corrigidos: `docs/desvios-protocolo.md`.

@@ -89,3 +89,12 @@ def test_stale_fallback():
     assert stale[0] and est[0] == pytest.approx(0.1 + 0.48)
     est2, _ = ing.estimate(48 * 3600.0, "observed", 24, False)
     assert est2[0] == pytest.approx(0.1)
+
+
+def test_quantize_matches_payload():
+    from wastesim.telemetry import build_telemetry, quantize
+    for d, occ, ok in [(43.2671, 61.83349, True), (12.04999, 99.95, True), (None, None, False), (87.5, 3.0, False)]:
+        msg = build_telemetry("LX-0001", 0, 1, 10.0, d, occ, ok)
+        dq, oq = quantize(d, occ, ok)
+        assert msg["leituras"][0]["valor"] == dq
+        assert msg["leituras"][1]["valor"] == oq

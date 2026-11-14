@@ -1,0 +1,165 @@
+{
+  "broker": "mosquitto version 2.0.20",
+  "paho": "2.2.0",
+  "started": "2026-11-14T14:21:18-0300",
+  "T1": [
+    {
+      "qos": 0,
+      "rep": 0,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 342.94672351483763,
+      "lat_ms_median": 0.6091594696044922,
+      "lat_ms_p95": 0.9739518165588377,
+      "lat_ms_p99": 1.2538433074951172,
+      "lat_ms_max": 40.28773307800293
+    },
+    {
+      "qos": 0,
+      "rep": 1,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 342.97199171449864,
+      "lat_ms_median": 0.6148815155029297,
+      "lat_ms_p95": 0.9686946868896484,
+      "lat_ms_p99": 1.2364578247070281,
+      "lat_ms_max": 39.041996002197266
+    },
+    {
+      "qos": 0,
+      "rep": 2,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 342.175795035336,
+      "lat_ms_median": 0.6101131439208984,
+      "lat_ms_p95": 0.9586930274963377,
+      "lat_ms_p99": 1.2180852890014642,
+      "lat_ms_max": 39.958953857421875
+    },
+    {
+      "qos": 1,
+      "rep": 0,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 342.47665575093964,
+      "lat_ms_median": 0.6773471832275391,
+      "lat_ms_p95": 1.1396408081054688,
+      "lat_ms_p99": 1.447923183441161,
+      "lat_ms_max": 22.233009338378906
+    },
+    {
+      "qos": 1,
+      "rep": 1,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 342.5836143703214,
+      "lat_ms_median": 0.6656646728515625,
+      "lat_ms_p95": 1.1439561843872066,
+      "lat_ms_p99": 1.4438748359680156,
+      "lat_ms_max": 37.14394569396973
+    },
+    {
+      "qos": 1,
+      "rep": 2,
+      "published": 20000,
+      "received_unique": 20000,
+      "delivered_pct": 100.0,
+      "duplicates": 0,
+      "rate_msgs_s": 341.9650670416563,
+      "lat_ms_median": 0.6794929504394531,
+      "lat_ms_p95": 1.1692047119140625,
+      "lat_ms_p99": 1.5003824234008767,
+      "lat_ms_max": 18.885135650634766
+    }
+  ],
+  "T2": {
+    "batch": {
+      "km_total": 384.83501347220954,
+      "visits": 89.0,
+      "collected_m3": 68.06784605798858,
+      "overflow_m3": 0.10236074148186015,
+      "overflow_events": 4.0
+    },
+    "batch_quantized": {
+      "km_total": 384.99202899522766,
+      "visits": 90.0,
+      "collected_m3": 67.55817964577591,
+      "overflow_m3": 0.06909123459996876,
+      "overflow_events": 3.0
+    },
+    "live": {
+      "km_total": 384.99202899522766,
+      "visits": 90.0,
+      "collected_m3": 67.55817964577591,
+      "overflow_m3": 0.06909123459996876,
+      "overflow_events": 3.0
+    },
+    "identical": false,
+    "identical_quantized": true,
+    "live_info": {
+      "published": 5632,
+      "received": 5632,
+      "ingest": {
+        "received": 5632,
+        "applied": 5571,
+        "duplicates": 0,
+        "out_of_order": 0,
+        "invalid_reading": 61,
+        "rejected": 0
+      },
+      "wall_s": 8.481786012649536,
+      "latency_ms_median": 4.923820495605469,
+      "latency_ms_p99": 10.994598865509033
+    },
+    "rerun_at": "2026-11-14T14:30:34-0300"
+  },
+  "T3": [
+    {
+      "qos": 0,
+      "published_calls": 7830,
+      "publish_rc_not_success": 237,
+      "received_unique": 7593,
+      "delivered_pct": 96.97318007662835,
+      "lost": 237,
+      "duplicates": 0,
+      "broker_restart_s": 0.36911487579345703,
+      "devices_reconnected": 100,
+      "reconnection_events": 100
+    },
+    {
+      "qos": 1,
+      "published_calls": 7740,
+      "publish_rc_not_success": 241,
+      "received_unique": 7740,
+      "delivered_pct": 100.0,
+      "lost": 0,
+      "duplicates": 0,
+      "broker_restart_s": 0.3960278034210205,
+      "devices_reconnected": 100,
+      "reconnection_events": 100
+    }
+  ],
+  "T4": {
+    "crashed": 10,
+    "offline_detected": 10,
+    "all_lwt": true,
+    "correct_ids": true,
+    "detection_s_max": 2.972386360168457,
+    "retained_offline_seen_by_new_subscriber": 10
+  },
+  "T5": {
+    "sent": 50,
+    "rejected": 50,
+    "state_unchanged": true
+  }
+}

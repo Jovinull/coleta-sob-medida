@@ -19,6 +19,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import rankdata, wilcoxon
 
+from experiments.labels import latex as cond_tex
+
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "experiments/raw"
 RES = ROOT / "experiments/results"
@@ -128,6 +130,7 @@ def describe(df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
 def f(x, d=1):
     if x is None or not np.isfinite(x):
         return "---"
+    x = 0.0 if round(float(x), d) == 0 else x   # evita "−0,00"
     s = f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return s.replace("-", "$-$") if s.startswith("-") else s
 
@@ -291,7 +294,9 @@ def tab_comp(comps: pd.DataFrame, family_prefix: str, conds=None, pairs=None, co
     rows = []
     for _, r in c.iterrows():
         cl = cond_label(r.condition) if cond_label else r.condition
-        rows.append(f"{cl} & \\pol{r.alt.replace('-', '')}{{}} $-$ \\pol{r.ref.replace('-', '')}{{}} & {f(r['diff'], 2)} & "
+        cmp = (f"\\pol{r.alt.replace('-', '')}{{}} (cond. $-$ base)" if r.alt == r.ref else
+               f"\\pol{r.alt.replace('-', '')}{{}} $-$ \\pol{r.ref.replace('-', '')}{{}}")
+        rows.append(f"{cl} & {cmp} & {f(r['diff'], 2)} & "
                     f"[{f(r.ci_lo, 2)}; {f(r.ci_hi, 2)}] & {f(r.rel_pct, 1)} & {f(r.r_rb, 2)} & {fp(r.p_holm)} \\\\")
     return "\n".join(rows)
 
@@ -313,7 +318,7 @@ def write_tex(desc, comps, e2pts, e2at, dfs):
                               (f"E3/{metric}", "degradacao", f"tab_e3_deg_{metric}"),
                               (f"E4/{metric}", None, f"tab_e4_{metric}")):
             cc = comps if kind is None else comps[comps.get("kind", pd.Series(index=comps.index)).eq(kind)]
-            body = tab_comp(cc, fam, cond_label=lambda c: c.replace("_", " ").replace("%", "\\%"))
+            body = tab_comp(cc, fam, cond_label=cond_tex)
             (TEX / f"{fn}.tex").write_text(hdr.replace("COND", "Condição") + body + end)
     # E3: tabela compacta de transbordamento e disponibilidade por condição
     if "E3" not in dfs:
@@ -328,7 +333,7 @@ def write_tex(desc, comps, e2pts, e2at, dfs):
             cells.append(f(g["mean"].iloc[0], 2) if len(g) else "---")
         av = d3[(d3.condition == c) & (d3.policy == "C") & (d3.metric == "telemetry_availability")]
         kmD = d3[(d3.condition == c) & (d3.policy == "D") & (d3.metric == "km_per_day")]
-        rows.append(f"{c.replace('_', ' ').replace('%', '\\%')} & {f(100 * av['mean'].iloc[0], 1) if len(av) else '---'} & "
+        rows.append(f"{cond_tex(c)} & {f(100 * av['mean'].iloc[0], 1) if len(av) else '---'} & "
                     + " & ".join(cells) + f" & {f(kmD['mean'].iloc[0], 1) if len(kmD) else '---'} \\\\")
     (TEX / "tab_e3.tex").write_text(
         "\\begin{tabular}{@{}lrrrrrr@{}}\n\\toprule\n & Telemetria & \\multicolumn{4}{c}{Transbordamento (\\% do volume)} & km/dia \\\\\n"
@@ -344,7 +349,8 @@ def write_macros(desc, comps, e2at, dfs, e6):
     for e in ("E1", "E2", "E3", "E4", "E5"):
         m += macro(f"NExec{e}", f(len(dfs[e]), 0) if e in dfs else "---")
     allok = pd.concat([d[d.status == "ok"] for d in dfs.values()])
-    m += macro("BalancoMaxResidual", f"{np.abs(allok.mass_balance_residual_l).max():.1e}".replace(".", ","))
+    mant, ex = f"{np.abs(allok.mass_balance_residual_l).max():.1e}".split("e")
+    m += macro("BalancoMaxResidual", f"${mant.replace('.', '{,}')}\\times 10^{{{int(ex)}}}$")
     m += macro("CPUhoras", f(allok.wall_s.sum() / 3600, 1))
 
     def dsc(exp, cond, pol, metric, k=1, scale=1.0):
@@ -393,8 +399,9 @@ def write_macros(desc, comps, e2at, dfs, e6):
             m += macro(f"Rel{tag}", f(r.rel_pct, 1)) + macro(f"Dif{tag}", f(r["diff"], 2)) + macro(f"P{tag}", fp(r.p_holm))
     for _, r in c[c.exp == "E5"].iterrows():
         tag = f"Sol{r.condition}{ {'km_per_day': 'Km', 'overflow_pct': 'Ov', 'solver_s_mean': 'T'}[r.metric]}"
-        m += macro(f"Rel{tag}", f(r.rel_pct, 1)) + macro(f"Dif{tag}", f(r["diff"], 2)) + macro(f"P{tag}", fp(r.p_holm))
-        m += macro(f"Ref{tag}", f(r.mean_ref, 2)) + macro(f"Alt{tag}", f(r.mean_alt, 2))
+        m += macro(f"Rel{tag}", f(r.rel_pct, 1)) + macro(f"Dif{tag}", f(r["diff"], 3)) + macro(f"P{tag}", fp(r.p_holm))
+        k = 1 if r.metric == "km_per_day" else 2
+        m += macro(f"Ref{tag}", f(r.mean_ref, k)) + macro(f"Alt{tag}", f(r.mean_alt, k))
     if e6:
         for i, t in enumerate(e6["T1"]):
             pass
@@ -411,13 +418,35 @@ def write_macros(desc, comps, e2at, dfs, e6):
             m += macro(f"RestartLost{qq}", f(t["lost"], 0)) + macro(f"RestartPub{qq}", f(t["published_calls"], 0))
             m += macro(f"RestartDeliv{qq}", f(t["delivered_pct"], 2)) + macro(f"RestartDup{qq}", f(t["duplicates"], 0))
             m += macro(f"RestartRecon{qq}", str(t["devices_reconnected"])) + macro(f"RestartDur{qq}", f(t["broker_restart_s"], 1))
+            m += macro(f"RestartPubFail{qq}", f(t["publish_rc_not_success"], 0))
         m += macro("LwtDetected", str(e6["T4"]["offline_detected"])) + macro("LwtCrashed", str(e6["T4"]["crashed"]))
         m += macro("LwtTime", f(e6["T4"]["detection_s_max"], 2))
         m += macro("LwtRetained", str(e6["T4"]["retained_offline_seen_by_new_subscriber"]))
         m += macro("MalSent", str(e6["T5"]["sent"])) + macro("MalRejected", str(e6["T5"]["rejected"]))
         m += macro("EquivOk", "idênticas" if e6["T2"]["identical"] else "diferentes")
-        m += macro("BrokerVersion", e6["broker"].replace("_", "\\_"))
+        t2 = e6["T2"]
+        m += macro("EquivQuant", "idênticas" if t2.get("identical_quantized") else "diferentes")
+        m += macro("EquivVisLote", f(t2["batch"]["visits"], 0)) + macro("EquivVisLive", f(t2["live"]["visits"], 0))
+        m += macro("EquivOvLote", f(t2["batch"]["overflow_events"], 0))
+        m += macro("EquivOvLive", f(t2["live"]["overflow_events"], 0))
+        m += macro("EquivKmLote", f(t2["batch"]["km_total"], 1)) + macro("EquivKmLive", f(t2["live"]["km_total"], 1))
+        m += macro("BrokerVersion", e6["broker"].replace("mosquitto version", "").strip().replace("_", "\\_"))
         m += macro("PahoVersion", e6["paho"])
+    if not e6:  # E6 ainda não executado: marcadores visíveis no PDF
+        names = [f"{k}{q}" for k in ("MqttDeliv", "MqttLatMed", "MqttLatPNN", "MqttRate", "MqttPub", "RestartLost",
+                                     "RestartPub", "RestartPubFail", "RestartDeliv", "RestartDup", "RestartRecon", "RestartDur")
+                 for q in ("Zero", "Um")]
+        names += ["LwtDetected", "LwtCrashed", "LwtTime", "LwtRetained", "MalSent", "MalRejected", "EquivOk",
+                  "EquivQuant", "EquivVisLote", "EquivVisLive", "EquivOvLote", "EquivOvLive", "EquivKmLote",
+                  "EquivKmLive",
+                  "BrokerVersion", "PahoVersion"]
+        m += "".join(macro(k, "---") for k in names)
+    rp = RES / "reprodutibilidade.json"
+    if rp.exists():
+        r = json.loads(rp.read_text())
+        m += macro("ReproN", str(r["n"])) + macro("ReproIdenticas", str(r["identical"]))
+    else:
+        m += macro("ReproN", "---") + macro("ReproIdenticas", "---")
     return m
 
 
@@ -457,7 +486,8 @@ def main():
     # variantes com ponto decimal para o abstract em inglês
     import re as _re
     en = ""
-    for name in ("NExecTotal", "RelNCemCvsAKm", "OvNCemC", "OvNCemA", "RelNCemDvsAKm", "OvNCemD", "RelFrontUmDvsA"):
+    for name in ("NExecTotal", "RelNCemCvsAKm", "OvNCemC", "OvNCemA", "RelNCemDvsAKm", "OvNCemD", "RelFrontUmDvsA",
+                 "RelFrontUmCvsA"):
         mm = _re.search(r"\\newcommand\{\\" + name + r"\}\{([^}]*)\}", m)
         if mm:
             v = mm.group(1).replace(".", "").replace(",", ".") if name != "NExecTotal" else mm.group(1).replace(".", ",")

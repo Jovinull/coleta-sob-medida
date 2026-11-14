@@ -34,7 +34,7 @@ from . import policies
 from . import sensor as sensor_mod
 from .config import ScenarioConfig
 from .ingest import Ingestor
-from .telemetry import Reading, device_id
+from .telemetry import Reading, device_id, quantize
 
 H = 3600.0
 
@@ -58,8 +58,11 @@ class Truck:
 
 
 class Simulation:
-    def __init__(self, cfg: ScenarioConfig):
+    def __init__(self, cfg: ScenarioConfig, quantize_payload: bool = False):
         self.cfg = cfg
+        # True: as leituras passam pelo mesmo arredondamento do payload MQTT
+        # (usado na verificação de equivalência lote × live, E6/T2)
+        self.quantize_payload = quantize_payload
         t = cfg.time
         self.step_s = t.step_min * 60.0
         self.spd = t.steps_per_day
@@ -271,6 +274,8 @@ class Simulation:
                     self._stuck_d[i] = d
                 d = self._stuck_d[i]
             occ, ok = sensor_mod.occupancy_from_distance(d, ccfg)
+            if self.quantize_payload:
+                d, occ = quantize(d, occ, ok)
             self._seq[i] += 1
             r = Reading(device_id(i), 0, int(self._seq[i]), ts, d, occ, ok)
             arrivals = net_mod.transmit(i, t, self.net, ncfg, self.step_s)

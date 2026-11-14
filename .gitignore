@@ -15,3 +15,7 @@ paper/build/
 *.synctex.gz
 live/*.db
 wastesim.egg-info/
+logs/
+.watchdog-pause
+experiments/results/e6_equivalencia.db
+experiments/results/e6_state.json

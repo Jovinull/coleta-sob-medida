@@ -37,14 +37,20 @@ class Reading:
     valid: bool
 
 
+def quantize(distance_cm: float | None, occupancy: float | None, valid: bool):
+    """Arredondamento aplicado pelo contrato MQTT (0,1 cm; 0,1 %)."""
+    d = None if distance_cm is None else round(distance_cm, 1)
+    o = None if (not valid or occupancy is None) else round(occupancy, 1)
+    return d, o
+
+
 def build_telemetry(dev: str, boot: int, seq: int, ts: float, distance_cm: float | None,
                     occupancy: float | None, valid: bool, ts_src: str = "sim",
                     extra: list[dict] | None = None) -> dict:
+    dq, oq = quantize(distance_cm, occupancy, valid)
     leit = [
-        {"tipo": "distancia", "valor": None if distance_cm is None else round(distance_cm, 1),
-         "unidade": "cm", "valida": distance_cm is not None},
-        {"tipo": "ocupacao", "valor": None if not valid else round(occupancy, 1),
-         "unidade": "%", "valida": bool(valid)},
+        {"tipo": "distancia", "valor": dq, "unidade": "cm", "valida": distance_cm is not None},
+        {"tipo": "ocupacao", "valor": oq, "unidade": "%", "valida": bool(valid)},
     ]
     if extra:
         leit.extend(extra)

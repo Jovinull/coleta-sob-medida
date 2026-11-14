@@ -1,8 +1,8 @@
 \section{Resultados e discussão}\label{sec:resultados}
 
-Todos os números desta seção são gerados pelos scripts de análise a partir dos
-arquivos brutos e inseridos no texto por macros; nenhum valor foi digitado à
-mão. Foram realizadas \NExecTotal{} execuções de simulação, com
+Os números desta seção são gerados pelos scripts de análise a partir dos
+arquivos brutos e inseridos no texto por macros. Valores arredondados
+precedidos de ``cerca de'' resumem as mesmas tabelas. Foram realizadas \NExecTotal{} execuções de simulação, com
 \NExecErros{} falhas de execução, totalizando \CPUhoras{} horas de
 processamento.
 
@@ -55,35 +55,38 @@ transbordar.
 \paragraph{Diferenças operacionais (QP2).}
 Os resultados confirmam parcialmente as hipóteses pré-especificadas.
 \emph{H2a} se confirma: C percorreu menos que A em todas as escalas, com
-redução de \RelNVinteCvsAKm\%, \RelNCemCvsAKm\% e \RelNQuinhentosCvsAKm\% para
+variação de \RelNVinteCvsAKm\%, \RelNCemCvsAKm\% e \RelNQuinhentosCvsAKm\% para
 20, 100 e 500 contêineres ($p_{\mathrm{Holm}}$ \PNCemCvsAKm{} em $N = 100$;
 $r_{rb} = -1$, isto é, menor distância em todas as 30 sementes). Mas essa
 economia veio acompanhada de transbordamento maior: \OvNCemC\% do volume
 gerado em C contra \OvNCemA\% em A ($N = 100$), uma diferença de
 \DifNCemCvsAOv{} pontos percentuais (IC 95\%: \LoNCemCvsAOv{} a
-\HiNCemCvsAOv). \emph{H2b} se confirma com folga: B transbordou
-\OvNCemB\% do volume em $N = 100$, cerca de quatro vezes o valor de A, e só
-visita contêineres que já estão perto do limite. O roteirizador também pesa:
-com o vizinho mais próximo e 2-opt, B percorreu \RelNCemBvsAKm\% e
-\RelNQuinhentosBvsAKm\% a mais que A em $N = 100$ e $N = 500$; com o OR-Tools
-(B-OR), a mesma seleção percorreu \RelNCemBORvsAKm\% e
-\RelNQuinhentosBORvsAKm\% em relação a A. Isso mostra que parte do ganho
-atribuído à ``coleta inteligente'' em comparações informais pode vir apenas da
-qualidade do roteirizador.
+\HiNCemCvsAOv). Em $N = 500$ a redução relativa de C foi menor que nas
+outras escalas. \emph{H2b} se confirma com folga: B transbordou
+\OvNCemB\% do volume em $N = 100$, mais de cinco vezes o valor de A, pois só
+visita contêineres que já estão perto do limite. O roteirizador também pesa.
+Com o vizinho mais próximo e 2-opt, B percorreu praticamente a mesma
+distância que A em $N = 100$ (\RelNCemBvsAKm\%; $p_{\mathrm{Holm}} = $~\PNCemBvsAKm) e \RelNQuinhentosBvsAKm\% em $N = 500$, embora visitasse menos
+contêineres por dia. Com o OR-Tools (B-OR), a mesma seleção percorreu
+\RelNCemBORvsAKm\% e \RelNQuinhentosBORvsAKm\% em relação a A. Portanto, em
+comparações informais, parte do ganho atribuído à ``coleta inteligente'' pode
+vir apenas da qualidade do roteirizador.
 
 \emph{H2c} também se confirma: D transbordou menos que C em todas as escalas
 (\OvNCemD\% contra \OvNCemC\% em $N = 100$; $p_{\mathrm{Holm}}$
 \PNCemDvsCOv) e percorreu mais (\RelNCemDvsCKm\%). O resultado mais
 relevante para a questão prática, porém, é a comparação com a linha de base:
-D percorreu \RelNCemDvsAKm\% e \RelNQuinhentosDvsAKm\% em relação a A, em
-$N = 100$ e $N = 500$, e ao mesmo tempo transbordou menos
-(\RelNCemDvsAOv\% e \RelNQuinhentosDvsAOv\%; $p_{\mathrm{Holm}}$
-\PNCemDvsAOv{} e \PNQuinhentosDvsAOv). Em $N = 20$, a redução de distância de
-D (\RelNVinteDvsAKm\%) foi significativa, mas a de transbordamento
-(\RelNVinteDvsAOv\%) não foi ($p_{\mathrm{Holm}} = $~\PNVinteDvsAOv). Com
-poucos contêineres espalhados pela cidade, cada visita exige deslocamentos
-longos, e a escolha de quais pontos visitar tem pouco efeito sobre a
-distância total.
+D percorreu menos que A nas três escalas (\RelNVinteDvsAKm\%,
+\RelNCemDvsAKm\% e \RelNQuinhentosDvsAKm\%), com transbordamento igual ou
+menor. Em $N = 500$, D transbordou \RelNQuinhentosDvsAOv\% em relação a A
+($p_{\mathrm{Holm}}$ \PNQuinhentosDvsAOv). Em $N = 100$ e $N = 20$, as
+diferenças de transbordamento (\RelNCemDvsAOv\% e \RelNVinteDvsAOv\%) não
+foram significativas ($p_{\mathrm{Holm}} = $~\PNCemDvsAOv{} e
+\PNVinteDvsAOv). Pelo item~4 da análise pré-especificada, isso não autoriza
+afirmar que os dois níveis de serviço sejam equivalentes, apenas que não se
+detectou diferença com 30 sementes. Mesmo assim, é o único caso do E1 em que
+uma política com telemetria reduz a distância sem piora detectável do
+transbordamento.
 
 \begin{table}[ht]
 \centering
@@ -111,24 +114,25 @@ necessária para cada nível de transbordamento (Figura~\ref{fig:e2}).
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_e2.pdf}
-  \caption{E2 -- fronteiras distância $\times$ transbordamento ($N = 100$; 20 sementes por ponto; barras: IC 95\% nos dois eixos). Números junto aos pontos extremos: valor do parâmetro (ocupação-alvo $\gamma$ para A; limiar $\theta_{hi}$ para B-OR, C e D).}
+  \caption{E2 -- fronteiras distância $\times$ transbordamento ($N = 100$; 20 sementes por ponto; barras: IC 95\% nos dois eixos). Números junto aos pontos: valor do parâmetro nos extremos (ocupação-alvo $\gamma$ de 0,4 a 1 para A; limiar $\theta_{hi}$ a partir de 0,3 para B-OR e C e de 0,5 para D, no extremo de menor transbordamento).}
   \label{fig:e2}
 \end{figure}
 
-A curva de A fica acima das demais em toda a faixa em que há sobreposição:
-para manter o transbordamento em 1\% do volume gerado, A precisou, em média,
-de \KmAtUmA{}~km/dia, contra \KmAtUmD{}~km/dia em D, uma redução de
+A curva de A fica acima das demais nos dois níveis analisados: para manter o transbordamento em 1\% do volume gerado, A precisou, em média,
+de \KmAtUmA{}~km/dia, contra \KmAtUmD{}~km/dia em D, uma variação de
 \RelFrontUmDvsA\% (\NFrontUmDvsA{} sementes; $p_{\mathrm{Holm}}$
-\PFrontUmDvsA). Com 2\% de transbordamento, a redução foi de
-\RelFrontDoisCvsA\% para C e de \RelFrontDoisBORvsA\% para B-OR
-(Tabela~\ref{tab:e2}). Onde as curvas de C e D se sobrepõem, elas ficam
-próximas: com 2\%, D exigiu \RelFrontDoisDvsC\% de distância em relação a C
-(\NFrontDoisDvsC{} sementes em que ambos alcançam o nível). B-OR, que não usa
-contêineres opcionais, fica entre A e C.
+\PFrontUmDvsA). Para C, a variação foi de \RelFrontUmCvsA\%, e para B-OR, de
+\RelFrontUmBORvsA\%. Com 2\% de transbordamento, a variação foi de
+\RelFrontDoisCvsA\% para C, \RelFrontDoisDvsA\% para D e
+\RelFrontDoisBORvsA\% para B-OR (Tabela~\ref{tab:e2}). As curvas de C e D
+ficam próximas. Em 1\%, a diferença de D em relação a C foi de
+\RelFrontUmDvsC\% e não significativa ($p_{\mathrm{Holm}} = $~\PFrontUmDvsC).
+Em 2\%, D exigiu \RelFrontDoisDvsC\% a mais que C ($p_{\mathrm{Holm}}$
+\PFrontDoisDvsC). B-OR, que não usa contêineres opcionais, fica entre A e C.
 
 \begin{table}[ht]
 \centering
-\caption{E2 -- distância necessária no mesmo nível de transbordamento (interpolação por semente; diferença em km/dia). Comparações com menos de 20 pares correspondem a sementes em que uma das políticas não alcança o nível dentro da faixa varrida.}
+\caption{E2 -- distância necessária no mesmo nível de transbordamento (interpolação por semente; diferença em km/dia). Todas as políticas alcançaram os dois níveis nas 20 sementes, e todas as comparações têm 20 pares.}
 \label{tab:e2}
 \scriptsize
 \resizebox{\textwidth}{!}{\input{resultados/tab_e2_comp.tex}}
@@ -139,9 +143,13 @@ que a previsão seja necessária para obter ganhos; indica sobretudo que, com os
 parâmetros padrão, C opera em um ponto de mais transbordamento da fronteira e
 D em um ponto de menos. A vantagem robusta, observada em ambos, é a da seleção
 orientada por dados sobre o calendário fixo: para o mesmo nível de serviço,
-cerca de 10\% menos distância. A previsão serve, na prática, para alcançar
-níveis baixos de transbordamento (abaixo de 1\%) que C só atinge com limiares
-mais baixos e mais visitas. Esse valor, \RelFrontUmDvsA\%, é menor que os
+cerca de 9\% a 11\% menos distância, conforme o nível. No cenário-base, a
+previsão não trouxe economia adicional no mesmo nível de serviço: C, com
+limiar mais baixo, alcança o mesmo transbordamento com distância
+estatisticamente indistinguível da de D (1\%) ou ligeiramente menor (2\%). Com os
+parâmetros padrão, D opera no ponto de baixo transbordamento da fronteira.
+Sua vantagem aparece sobretudo quando a demanda muda ao longo do tempo
+(Seção~\ref{sec:e4}). Esse valor, \RelFrontUmDvsA\%, é menor que os
 ganhos médios relatados por estudos de simulação na meta-análise de
 \cite{maciel2025impact} (cerca de 40\%) e próximo da média de implantações
 reais (cerca de 12\%). Uma explicação plausível é que a linha de base aqui
