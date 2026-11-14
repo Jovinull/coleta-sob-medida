@@ -112,11 +112,11 @@ class NetworkCfg:
 @dc.dataclass
 class FleetCfg:
     n_vehicles: int | None = None  # None → dimensionado automaticamente
-    capacity_l: float = 45000.0    # 15 m³ compactados × razão 3:1 = 45 m³ soltos
+    capacity_l: float = 26000.0    # 15 m³ × 400 kg/m³ ≈ 6 t ≈ 26 m³ soltos a 230 kg/m³
     target_utilization: float = 0.7  # para o dimensionamento automático
     speed_kmh: float = 20.0
     service_min: float = 1.0        # ~42 s medidos (carlos2019influence) + posicionamento
-    unload_min: float = 25.0        # descarga no depósito (recurso de desvio)
+    unload_min: float = 15.0        # descarga (exemplo de monteiro2001manual, Tab. 1)
 
 
 @dc.dataclass
