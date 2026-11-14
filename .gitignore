@@ -19,3 +19,4 @@ logs/
 .watchdog-pause
 experiments/results/e6_equivalencia.db
 experiments/results/e6_state.json
+_site/

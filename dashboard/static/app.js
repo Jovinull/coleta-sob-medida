@@ -8,7 +8,14 @@ const fillColor = f => f < 0 ? css("--s") : f < 0.5 ? css("--g") : f < 0.75 ? cs
 const VCOL = ["#3a5bd9", "#9b3ad9", "#d93a8f", "#1b9fb0", "#7a5c2e", "#4b8b2b", "#c25e00", "#555"];
 
 let ROADS = null;
-async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
+// Modo estático (GitHub Pages): os endpoints viram arquivos JSON gerados por scripts/build_site.sh.
+const ESTATICO = !!window.PAINEL_ESTATICO;
+async function getJSON(u) {
+  if (ESTATICO) u = "api/" + u.replace(/^\/api\//, "").split("?")[0].replace(/\//g, "_") + ".json";
+  const r = await fetch(u);
+  if (!r.ok) throw new Error(ESTATICO ? "disponível apenas no painel local (uvicorn dashboard.app:app)" : await r.text());
+  return r.json();
+}
 
 // ------------------------------------------------------------------ mapa
 class MapView {
@@ -144,7 +151,8 @@ async function pollLive() {
     const ev = await getJSON("/api/events?limit=25");
     $("#events-live").innerHTML = ev.map(([dev, ts, tipo, det]) => `<div><b>${dev}</b> ${tipo.replace("_", " ")} <span class="muted">${hhmm(ts)} ${det !== "{}" ? det : ""}</span></div>`).join("") || '<span class="muted">nenhum evento</span>';
   } catch (e) { }
-  setTimeout(pollLive, 1000);
+  if (ESTATICO) $("#clock-live").textContent += " · instantâneo gravado";
+  else setTimeout(pollLive, 1000);
 }
 $("#filters").onclick = e => { if (!e.target.dataset.f) return; live.filter = e.target.dataset.f; document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("active", b === e.target)); renderLive(); };
 document.querySelectorAll('input[name=view]').forEach(r => r.onchange = () => { live.mode = r.value; renderLive(); });
@@ -222,6 +230,6 @@ async function initResults() {
   try { ROADS = await getJSON("/api/roads"); } catch (e) { }
   pollLive();
   if (live.sel) setTimeout(loadHistory, 1500);
-  const tab = new URLSearchParams(location.search).get("tab");
+  const tab = new URLSearchParams(location.search).get("tab") || (ESTATICO ? "replay" : null);
   if (tab) document.querySelector(`nav button[data-tab=${tab}]`)?.click();
 })();

@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coleta Inteligente de Resíduos — IoT, MQTT e simulação</title>
+<meta name="description" content="Do protótipo ESP32 + MQTT de 2024 a um estudo experimental reprodutível: 4.110 simulações pareadas na malha viária de Aracaju comparam coleta periódica, por limiar, dinâmica e preditiva.">
+<meta property="og:title" content="Coleta Inteligente de Resíduos — IoT, MQTT e simulação">
+<meta property="og:description" content="Firmware ESP32 auditado, contrato MQTT, simulador aberto, 4.110 execuções pareadas, painel web e artigo completo.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b2a24">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='9' width='18' height='20' rx='3' fill='%230f7a63'/%3E%3Crect x='5' y='5' width='22' height='4' rx='2' fill='%230f7a63'/%3E%3Crect x='10' y='17' width='12' height='9' rx='1.5' fill='%236ff0c9'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{const t=localStorage.getItem("tema");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#topo" aria-label="Início">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="7" y="9" width="18" height="20" rx="3" fill="#0f7a63"/><rect x="5" y="5" width="22" height="4" rx="2" fill="#0f7a63"/><rect x="10" y="17" width="12" height="9" rx="1.5" fill="#6ff0c9"/></svg>
+      <span>Coleta Inteligente</span>
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#historia">História</a>
+      <a href="#arquitetura">Arquitetura</a>
+      <a href="#firmware">Firmware</a>
+      <a href="#simulacao">Simulação</a>
+      <a href="#resultados">Resultados</a>
+      <a href="#robustez">Robustez</a>
+      <a href="#animacoes">Animações</a>
+      <a href="#painel">Painel</a>
+      <a href="#reproduzir">Reproduzir</a>
+      <a href="#artigo">Artigo</a>
+    </nav>
+    <button class="iconbtn" id="tema" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <a class="iconbtn" href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos" title="Repositório no GitHub" aria-label="GitHub">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- ============================================================ HERO -->
+<section class="hero" id="topo">
+  <div class="wrap">
+    <div>
+      <span class="pill"><b>TCC 2024 → estudo experimental 2026</b> · IFS campus Lagarto</span>
+      <h1>Sensores nas lixeiras tornam a coleta <em>mais eficiente</em>? Testamos 4.110 vezes.</h1>
+      <p>Um protótipo de TCC com ESP32 e MQTT virou uma plataforma aberta de simulação. Ela compara quatro estratégias de coleta na malha viária real de Aracaju (SE), com sensores que falham, mensagens que se perdem e caminhões com capacidade limitada.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#resultados">Ver os resultados →</a>
+        <a class="btn ghost" href="assets/docs/tcc-2026.pdf">Artigo (PDF, 47 p.)</a>
+        <a class="btn ghost" href="painel/">Painel interativo</a>
+        <a class="btn ghost" href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos">Código</a>
+      </div>
+      <p class="small" style="font-size:.82rem;margin-top:14px">Malha viária real (OpenStreetMap). Posições de contêineres e depósito <b style="color:#fff">hipotéticas</b>. Os resultados são de simulação e não representam o serviço de coleta de Aracaju.</p>
+    </div>
+    <div class="hero-visual">
+      <div class="frame">
+        <video autoplay muted loop playsinline poster="assets/posters/C_coleta_veiculos.jpg" aria-label="Animação: veículos coletando contêineres na malha de Aracaju">
+          <source src="assets/anim/C_coleta_veiculos.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="cap">Política D (preditiva) em ação: ocupação verdadeira dos contêineres e rotas dos veículos ao longo dos dias simulados.</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats" id="hero-stats">
+      <div class="stat"><b data-count="4110">4.110</b><span>execuções pareadas por semente</span></div>
+      <div class="stat"><b data-count="0">0</b><span>execuções com falha</span></div>
+      <div class="stat"><b><span data-count="125">125</span>/125</b><span>reexecuções idênticas (reprodutibilidade)</span></div>
+      <div class="stat"><b data-count="27">27</b><span>defeitos documentados no firmware de 2024</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ HISTÓRIA -->
+<section class="sec" id="historia">
+  <div class="wrap">
+    <span class="tag">De onde veio</span>
+    <h2>Do protótipo ao experimento</h2>
+    <p class="lead">Em 2024, o TCC montou uma lixeira com sensor ultrassônico, ESP32 e MQTT, e concluiu que a abordagem otimizaria a coleta, mas sem nenhum experimento que sustentasse essa conclusão. Em 2026, o projeto foi retomado para responder à pergunta com dados: <b>quando</b> e <b>quanto</b> os dados de nível ajudam?</p>
+
+    <div class="timeline">
+      <div class="tl old" data-n="24"><h4>Protótipo (2024)</h4><p>ESP32 + HC-SR04 + DHT11 publicando em um broker público. Testes qualitativos. Material preservado em <code>original/</code> com hashes SHA-256.</p></div>
+      <div class="tl" data-n="1"><h4>Auditoria</h4><p>Firmware lido linha a linha e compilado contra as bibliotecas. 27 defeitos documentados, 3 críticos. Texto e referências do TCC também auditados.</p></div>
+      <div class="tl" data-n="2"><h4>Reconstrução</h4><p>Firmware 2.0 não bloqueante, contrato MQTT versionado com LWT e deduplicação. Broker Mosquitto local.</p></div>
+      <div class="tl" data-n="3"><h4>Simulação</h4><p>Pacote <code>wastesim</code>: demanda estocástica, sensor com ruído e falhas, canal com perdas, ingestão, quatro políticas, OR-Tools na malha OSM.</p></div>
+      <div class="tl" data-n="4"><h4>Experimentos</h4><p>Protocolo pré-registrado, E1–E6, 30 sementes pareadas, IC 95% por bootstrap, Wilcoxon com correção de Holm. Artigo completo.</p></div>
+    </div>
+
+    <h3 style="margin-top:56px">O que mudou</h3>
+    <div class="vs" style="margin-top:14px">
+      <div>
+        <div class="kicker">TCC 2024</div>
+        <h4>Protótipo e conclusões qualitativas</h4>
+        <ul>
+          <li>"Porcentagem" calculada sobre o espaço <b>vazio</b>: a lixeira vazia aparecia como ~100%</li>
+          <li>"Temperatura" publicada era o índice de calor</li>
+          <li>Broker público sem autenticação e comandos de um caractere</li>
+          <li>Afirmava "revisões sistemáticas" sem protocolo</li>
+          <li>Ganhos de rota e custo afirmados sem experimento</li>
+        </ul>
+      </div>
+      <div>
+        <div class="kicker" style="color:var(--accent)">Versão 2026</div>
+        <h4>Estudo experimental reprodutível</h4>
+        <ul>
+          <li>Ocupação = 100·(H − (d − offset))/H, limitada a [0, 100], com testes automatizados</li>
+          <li>Temperatura do ar, com compensação da velocidade do som</li>
+          <li>Broker local, tópicos por dispositivo, JSON versionado, LWT</li>
+          <li>Revisão narrativa declarada como tal; 99 fontes catalogadas e verificadas</li>
+          <li>Questões de pesquisa, hipóteses pré-especificadas e resultados negativos relatados</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:56px">Questões de pesquisa</h3>
+    <div class="card" style="margin-top:14px">
+      <div class="qp"><div class="n">QP1</div><div><h4>Quando coletar?</h4><p>Os dados de nível permitem coletar contêineres mais cheios do que um calendário fixo?</p></div></div>
+      <div class="qp"><div class="n">QP2</div><div><h4>Quais as diferenças operacionais?</h4><p>Quanto cada política percorre e quanto deixa transbordar, e o que muda no mesmo nível de serviço?</p></div></div>
+      <div class="qp"><div class="n">QP3</div><div><h4>E quando a telemetria falha?</h4><p>Perda de mensagens, interrupções regionais, ruído, sensores mortos ou congelados.</p></div></div>
+      <div class="qp"><div class="n">QP4</div><div><h4>Escala, demanda e frota</h4><p>Como os resultados mudam com 20, 100 ou 500 contêineres, demanda variável e frota insuficiente?</p></div></div>
+      <div class="qp"><div class="n">QP5</div><div><h4>Quando os dados não compensam?</h4><p>Em que condições o ganho é pequeno ou negativo?</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ARQUITETURA -->
+<section class="sec alt" id="arquitetura">
+  <div class="wrap">
+    <span class="tag">Como funciona</span>
+    <h2>Arquitetura: do sensor à rota</h2>
+    <p class="lead">A mesma cadeia de ingestão e decisão roda de dois modos: <b>em lote</b>, com canal simulado, para as milhares de execuções, e <b>live</b>, em que cada leitura passa por um broker MQTT real. O teste E6 compara os dois.</p>
+    <div class="diagram" style="margin-top:24px">
+      <svg viewBox="0 0 1100 430" role="img" aria-label="Diagrama da arquitetura: dispositivos publicam via MQTT no broker; a ingestão valida e deduplica; o estado estimado alimenta as políticas, que selecionam contêineres; o OR-Tools roteiriza na malha viária; o simulador fecha o laço com a coleta.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-ah"/></marker>
+        </defs>
+        <!-- camada física / dispositivos -->
+        <rect x="10" y="20" width="200" height="150" rx="14" class="dg-box"/>
+        <text x="30" y="48" class="dg-t">Dispositivo</text>
+        <text x="30" y="72" class="dg-s">ESP32 · HC-SR04 · DHT11</text>
+        <text x="30" y="92" class="dg-s">firmware 2.0 (C++)</text>
+        <text x="30" y="118" class="dg-s">ou dispositivo virtual</text>
+        <text x="30" y="138" class="dg-s">(100 a 500 no simulador)</text>
+        <rect x="176" y="31" width="20" height="24" rx="3" class="dg-bin"/><rect x="179" y="42" width="14" height="10" rx="1.5" class="dg-fill"/><rect x="172" y="26" width="28" height="4" rx="2" class="dg-bin"/>
+
+        <rect x="270" y="20" width="200" height="150" rx="14" class="dg-box dg-acc"/>
+        <text x="290" y="48" class="dg-t">Broker MQTT</text>
+        <text x="290" y="72" class="dg-s">Eclipse Mosquitto 2.0.20</text>
+        <text x="290" y="92" class="dg-s">127.0.0.1:1883</text>
+        <text x="290" y="118" class="dg-s">QoS 0/1 · LWT retido</text>
+        <text x="290" y="138" class="dg-s">tópicos por dispositivo</text>
+
+        <rect x="530" y="20" width="200" height="150" rx="14" class="dg-box"/>
+        <text x="550" y="48" class="dg-t">Ingestão</text>
+        <text x="550" y="72" class="dg-s">validação do esquema v1</text>
+        <text x="550" y="92" class="dg-s">dedup. por (boot, seq)</text>
+        <text x="550" y="118" class="dg-s">faixa física · ordem</text>
+        <text x="550" y="138" class="dg-s">online / offline</text>
+
+        <rect x="790" y="20" width="300" height="150" rx="14" class="dg-box"/>
+        <text x="810" y="48" class="dg-t">Estado estimado</text>
+        <text x="810" y="72" class="dg-s">última leitura válida + taxa estimada</text>
+        <text x="810" y="92" class="dg-s">fallback: dado com mais de 24 h é</text>
+        <text x="810" y="112" class="dg-s">projetado pela taxa de enchimento</text>
+        <text x="810" y="138" class="dg-s">SQLite + painel web (FastAPI)</text>
+
+        <!-- decisão -->
+        <rect x="790" y="250" width="300" height="160" rx="14" class="dg-box dg-acc"/>
+        <text x="810" y="278" class="dg-t">Política de coleta (06h)</text>
+        <g class="dg-s"><text x="810" y="304">A periódica fixa · B / B-OR limiar 75%</text><text x="810" y="324">C dinâmica (obrigatórios + opcionais</text><text x="810" y="344">com prêmio) · D preditiva (projeção</text><text x="810" y="364">ao fim do turno seguinte ≥ 95%)</text></g>
+        <text x="810" y="392" class="dg-s">seleciona quais contêineres visitar</text>
+
+        <rect x="530" y="250" width="200" height="160" rx="14" class="dg-box"/>
+        <text x="550" y="278" class="dg-t">Roteirização</text>
+        <text x="550" y="304" class="dg-s">OR-Tools (VRP com</text>
+        <text x="550" y="324" class="dg-s">capacidade e prêmios)</text>
+        <text x="550" y="350" class="dg-s">malha OSM de Aracaju</text>
+        <text x="550" y="370" class="dg-s">45.011 nós · 86.410 arcos</text>
+        <text x="550" y="392" class="dg-s">caminhos mínimos reais</text>
+
+        <rect x="270" y="250" width="200" height="160" rx="14" class="dg-box"/>
+        <text x="290" y="278" class="dg-t">Frota (simulada)</text>
+        <text x="290" y="304" class="dg-s">turno 07h–15h · 20 km/h</text>
+        <text x="290" y="324" class="dg-s">26.000 L por caminhão</text>
+        <text x="290" y="350" class="dg-s">desvio ao depósito</text>
+        <text x="290" y="370" class="dg-s">quando a carga excede</text>
+        <text x="290" y="392" class="dg-s">60 s por contêiner</text>
+
+        <rect x="10" y="250" width="200" height="160" rx="14" class="dg-box"/>
+        <text x="30" y="278" class="dg-t">Simulador</text>
+        <text x="30" y="304" class="dg-s">passo de 15 min</text>
+        <text x="30" y="324" class="dg-s">demanda estocástica</text>
+        <text x="30" y="350" class="dg-s">sensor: ruído, falhas,</text>
+        <text x="30" y="370" class="dg-s">congelamento, perdas</text>
+        <text x="30" y="392" class="dg-s">balanço de volume</text>
+
+        <!-- setas -->
+        <path d="M212 95 H266" class="dg-ln" marker-end="url(#ar)"/><text x="220" y="86" class="dg-a">JSON</text>
+        <path d="M472 95 H526" class="dg-ln" marker-end="url(#ar)"/><text x="478" y="86" class="dg-a">assina</text>
+        <path d="M732 95 H786" class="dg-ln" marker-end="url(#ar)"/>
+        <path d="M940 172 V246" class="dg-ln" marker-end="url(#ar)"/>
+        <path d="M788 330 H734" class="dg-ln" marker-end="url(#ar)"/><text x="742" y="320" class="dg-a">lista</text>
+        <path d="M528 330 H474" class="dg-ln" marker-end="url(#ar)"/><text x="484" y="320" class="dg-a">rotas</text>
+        <path d="M268 330 H214" class="dg-ln" marker-end="url(#ar)"/><text x="220" y="320" class="dg-a">coleta</text>
+        <path d="M110 248 V174" class="dg-ln dg-dash" marker-end="url(#ar)"/><text x="118" y="216" class="dg-a">nível verdadeiro → leitura</text>
+      </svg>
+    </div>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><div class="kicker">Python</div><h3>wastesim</h3><p class="muted small">Simulador, sensor, canal, ingestão, políticas, roteirização e modo live. ~2.200 linhas, 67 testes automatizados.</p></div>
+      <div class="card"><div class="kicker">C++ / Arduino</div><h3>Firmware 2.0</h3><p class="muted small">Máquina de estados não bloqueante, NVS, watchdog, TLS opcional. Compilado com arduino-cli (núcleo esp32 3.3.12).</p></div>
+      <div class="card"><div class="kicker">Web</div><h3>Painel</h3><p class="muted small">FastAPI e JavaScript sem dependências: operação ao vivo, replay A × D e resultados. <a href="painel/">Abrir a versão estática</a>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FIRMWARE -->
+<section class="sec" id="firmware">
+  <div class="wrap">
+    <span class="tag">Hardware e firmware</span>
+    <h2>27 defeitos, cada um com evidência</h2>
+    <p class="lead">O firmware de 2024 foi lido linha a linha, compilado contra as duas bibliotecas "Ultrasonic" candidatas e conferido com os datasheets. Cada defeito tem linha, evidência, impacto e correção (<a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/firmware/AUDITORIA.md">auditoria completa</a>).</p>
+    <div class="grid4" style="margin:26px 0">
+      <div class="kpi bad"><b>3</b><span>críticos: credenciais Wi-Fi em texto claro, broker público sem autenticação, ECHO de 5 V em GPIO de 3,3 V</span></div>
+      <div class="kpi"><b>10</b><span>altos: dado errado ou falha funcional</span></div>
+      <div class="kpi"><b>9</b><span>médios: confiabilidade e robustez</span></div>
+      <div class="kpi"><b>5</b><span>baixos: qualidade e manutenção</span></div>
+    </div>
+    <div class="grid2">
+      <figure>
+        <img src="assets/fig/fig_sensor.png" alt="Gráfico: indicador de 2024 versus ocupação de 2026 em função da distância medida" loading="lazy">
+        <figcaption>A fórmula de 2024 (laranja) crescia quando a lixeira <b>esvaziava</b>. Um eco perdido virava "51 cm", publicado como 102%. A de 2026 (azul) mede ocupação e é limitada a [0, 100].</figcaption>
+      </figure>
+      <div>
+        <h3>Destaques da auditoria</h3>
+        <ul class="clean">
+          <li><b>Indicador invertido:</b> <code>percentMax = distancia/Tmax·100</code> media espaço vazio.</li>
+          <li><b><code>dht.begin()</code> nunca chamado:</b> leituras intermitentes ou NaN publicadas como "nan".</li>
+          <li><b>LED configurado como entrada:</b> o comando "L" não acendia nada, mas o firmware respondia "O LED está aceso".</li>
+          <li><b>Timeout do eco virava medida:</b> a biblioteca devolve 51 cm quando não há eco.</li>
+          <li><b>ECHO em GPIO12:</b> pino de <i>strapping</i> da tensão da flash; movido para GPIO27.</li>
+          <li><b>Laços bloqueantes:</b> sem rede no boot, o dispositivo travava para sempre.</li>
+        </ul>
+        <div class="callout bad"><b>Segurança</b>O código e o README de 2024 publicaram credenciais Wi-Fi em texto claro, e elas continuam no histórico do Git. O firmware novo lê as credenciais de <code>config.h</code>, que fica fora do repositório. A senha daquela rede deve ser trocada.</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:28px"><b>Escopo</b>O firmware 2.0 foi <b>compilado</b>, mas não executado em placa física nem no Wokwi. Os resultados quantitativos deste site vêm da simulação.</div>
+  </div>
+</section>
+
+<!-- ============================================================ MQTT -->
+<section class="sec alt" id="mqtt">
+  <div class="wrap">
+    <span class="tag">Comunicação</span>
+    <h2>Contrato MQTT 3.1.1, versão 1</h2>
+    <p class="lead">Tópicos por dispositivo, payload JSON com versão, número de boot e de sequência, unidades e validade de cada leitura. A plataforma sabe <b>quem</b> mediu, <b>quando</b>, se a leitura é válida e se alguma mensagem se perdeu ou chegou duplicada.</p>
+    <div class="grid2" style="margin-top:24px">
+      <div>
+        <div class="topic"><span>residuos/dispositivos/<em>{id}</em>/telemetria</span><small>leituras periódicas · QoS 0/1</small></div>
+        <div class="topic"><span>residuos/dispositivos/<em>{id}</em>/estado</span><small>online/offline · retido · LWT</small></div>
+        <div class="topic"><span>residuos/dispositivos/<em>{id}</em>/eventos</span><small>limiar, falha de sensor, reinício</small></div>
+        <div class="topic"><span>residuos/dispositivos/<em>{id}</em>/comandos</span><small>plataforma → dispositivo</small></div>
+        <h3 style="margin-top:24px">Regras de ingestão</h3>
+        <ul class="clean">
+          <li>Rejeita JSON inválido, versão desconhecida, id divergente do tópico e ocupação fora da faixa física</li>
+          <li>Descarta duplicatas por (<code>boot</code>, <code>seq</code>) e trata mensagens fora de ordem</li>
+          <li>Last Will retido marca o dispositivo como offline após queda abrupta</li>
+          <li>Leitura inválida (<code>valida: false</code>) não altera o estado estimado</li>
+        </ul>
+      </div>
+      <div class="codewrap">
+<pre><span class="c">// residuos/dispositivos/LX-0007/telemetria</span>
+{
+  <span class="k">"v"</span>: 1,
+  <span class="k">"id"</span>: <span class="s">"LX-0007"</span>,
+  <span class="k">"boot"</span>: 4,
+  <span class="k">"seq"</span>: 1532,
+  <span class="k">"ts"</span>: 1731580000,
+  <span class="k">"ts_src"</span>: <span class="s">"ntp"</span>,
+  <span class="k">"leituras"</span>: [
+    {<span class="k">"tipo"</span>: <span class="s">"distancia"</span>,   <span class="k">"valor"</span>: 31.2, <span class="k">"unidade"</span>: <span class="s">"cm"</span>,   <span class="k">"valida"</span>: true},
+    {<span class="k">"tipo"</span>: <span class="s">"ocupacao"</span>,    <span class="k">"valor"</span>: 37.6, <span class="k">"unidade"</span>: <span class="s">"%"</span>,    <span class="k">"valida"</span>: true},
+    {<span class="k">"tipo"</span>: <span class="s">"temperatura"</span>, <span class="k">"valor"</span>: 28.0, <span class="k">"unidade"</span>: <span class="s">"degC"</span>, <span class="k">"valida"</span>: true},
+    {<span class="k">"tipo"</span>: <span class="s">"umidade"</span>,     <span class="k">"valor"</span>: 70.0, <span class="k">"unidade"</span>: <span class="s">"%RH"</span>,  <span class="k">"valida"</span>: true}
+  ],
+  <span class="k">"rssi"</span>: -61
+}
+
+<span class="c">// residuos/dispositivos/LX-0007/estado  (retido, também é o LWT)</span>
+{<span class="k">"v"</span>: 1, <span class="k">"id"</span>: <span class="s">"LX-0007"</span>, <span class="k">"estado"</span>: <span class="s">"offline"</span>, <span class="k">"motivo"</span>: <span class="s">"lwt"</span>}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ SIMULAÇÃO -->
+<section class="sec" id="simulacao">
+  <div class="wrap">
+    <span class="tag">O cenário</span>
+    <h2>Aracaju como laboratório</h2>
+    <p class="lead">A malha viária dirigida de Aracaju foi extraída do OpenStreetMap. Os contêineres de 1.100 L ficam em interseções sorteadas, e o depósito em um ponto escolhido: as posições são <b>hipotéticas</b>. A geração de resíduos parte de dados oficiais (0,88 kg/hab·dia no Nordeste, SINISA) e de perfis residencial, comercial e institucional com variação semanal e horária.</p>
+    <div class="grid2" style="margin-top:26px;align-items:start">
+      <figure><img src="assets/fig/fig_cenario.png" alt="Mapa do cenário: malha viária de Aracaju com contêineres por perfil e depósito" loading="lazy"><figcaption>Cenário-base: 100 contêineres hipotéticos por perfil de geração, depósito (losango) e malha OSM.</figcaption></figure>
+      <div>
+        <div class="grid2" style="gap:14px">
+          <div class="kpi"><b>45.011</b><span>nós da malha viária</span></div>
+          <div class="kpi"><b>86.410</b><span>arcos dirigidos</span></div>
+          <div class="kpi"><b>7 + 28</b><span>dias de aquecimento + dias avaliados</span></div>
+          <div class="kpi"><b>15 min</b><span>passo; planejamento às 06h</span></div>
+        </div>
+        <h3 style="margin-top:24px">O sensor também erra</h3>
+        <p class="muted">Ruído de 1,5 cm, superfície irregular (o primeiro eco vem do ponto mais alto do lixo), leituras inválidas e espúrias, indisponibilidade temporária (falha média a cada 60 dias, reparo em 12 h), perda de 1% das mensagens, atrasos e duplicatas. Nada disso é visível para as políticas, que só enxergam o que a ingestão aceitou.</p>
+        <p class="muted">Todas as políticas recebem <b>exatamente a mesma demanda, o mesmo ruído e as mesmas perdas</b> em cada semente (números aleatórios comuns). As diferenças medidas vêm só da política.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:48px">As cinco políticas</h3>
+    <div class="grid3" id="politicas" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ============================================================ RESULTADOS -->
+<section class="sec alt" id="resultados">
+  <div class="wrap">
+    <span class="tag">E1 e E2 · resultados principais</span>
+    <h2>Menos quilômetros, mas a que custo?</h2>
+    <p class="lead">Duas métricas resumem cada política: <b>km por dia</b> (custo) e <b>transbordamento</b> (% do volume gerado que não coube no contêiner; falha de serviço). Uma política só é melhor se reduz a primeira sem piorar a segunda.</p>
+
+    <div class="grid4" style="margin:26px 0" id="kpis-e1"></div>
+
+    <div class="chartcard" id="c-e1">
+      <div class="chart-head">
+        <div><h3>E1 · Custo × serviço por política</h3><p>Média de 30 sementes pareadas, com IC 95% nos dois eixos. Mais para baixo e para a esquerda é melhor.</p></div>
+        <div class="seg" id="e1-n" role="group" aria-label="Número de contêineres"><button data-n="20">20 contêineres</button><button data-n="100" class="on">100</button><button data-n="500">500</button></div>
+      </div>
+      <div class="legend" id="e1-leg"></div>
+      <div id="e1-svg"></div>
+      <div class="chart-foot"><span>A diferença de transbordamento entre D e A não foi significativa com 20 e 100 contêineres.</span><button class="linkbtn" data-table="e1-tab">Ver tabela</button></div>
+      <div class="datatable" id="e1-tab" hidden></div>
+    </div>
+
+    <div class="grid2" style="margin-top:22px">
+      <div class="card"><div class="kicker">QP1</div><h3>Coletar mais cheio</h3><p>Com o limiar, a ocupação média na coleta subiu de <b id="fill-a">61%</b> (A) para <b id="fill-b">92%</b> (B). Mas coletar mais cheio também significa chegar mais perto de transbordar: B transbordou ~5,8% do volume.</p></div>
+      <div class="card"><div class="kicker">Achado lateral</div><h3>O roteirizador conta muito</h3><p>A mesma seleção por limiar percorreu <b>~18% menos</b> com OR-Tools (B-OR) do que com vizinho mais próximo + 2-opt (B). Parte do ganho atribuído à "coleta inteligente" vem da roteirização.</p></div>
+    </div>
+
+    <div class="chartcard" id="c-e2" style="margin-top:22px">
+      <div class="chart-head">
+        <div><h3>E2 · Fronteira distância × transbordamento</h3><p>Cada ponto é um nível de agressividade da política (média de 20 sementes). Comparar no <b>mesmo nível de serviço</b> é a comparação justa.</p></div>
+      </div>
+      <div class="legend" id="e2-leg"></div>
+      <div id="e2-svg"></div>
+      <div class="chart-foot"><span>Eixo horizontal em escala logarítmica. Linha tracejada: 1% de transbordamento.</span><button class="linkbtn" data-table="e2-tab">Ver tabela</button></div>
+      <div class="datatable" id="e2-tab" hidden></div>
+    </div>
+    <div class="grid3" style="margin-top:22px" id="e2-cards"></div>
+  </div>
+</section>
+
+<!-- ============================================================ ROBUSTEZ -->
+<section class="sec" id="robustez">
+  <div class="wrap">
+    <span class="tag">E3, E4 e E5 · robustez e sensibilidade</span>
+    <h2>Quando a telemetria falha</h2>
+    <p class="lead">Cada condição altera um fator do cenário-base (100 contêineres, 30 sementes). As células mostram quanto o transbordamento mudou em relação à mesma política no cenário-base. Azul indica melhora e vermelho, piora; itálico indica diferença não significativa (Holm, α = 0,05).</p>
+    <div class="chartcard" style="margin-top:24px">
+      <div class="chart-head">
+        <div><h3>E3 · Variação do transbordamento (pontos percentuais)</h3><p>A política A não usa telemetria e serve de referência: o valor dela não muda nessas condições.</p></div>
+        <div class="seg" id="e3-m"><button data-m="ov" class="on">Transbordamento (p.p.)</button><button data-m="km">Distância (%)</button></div>
+      </div>
+      <div id="e3-heat" class="tablewrap" style="border:0;background:none"></div>
+      <div class="scale" id="e3-scale"></div>
+    </div>
+
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><div class="kicker">Perda de mensagens</div><h3>Quase irrelevante</h3><p class="muted">Mesmo perdendo 50% das mensagens, o efeito foi menor que 0,3 p.p. As decisões são diárias e as leituras, horárias: sobra redundância.</p></div>
+      <div class="card"><div class="kicker">Fallback por taxa</div><h3>Decisivo</h3><p class="muted">Com 30% dos sensores mortos e sem fallback, o transbordamento subiu de 12 a 16 p.p. Com o fallback ligado, subiu menos de 0,6 p.p.</p></div>
+      <div class="card" style="border-color:var(--bad)"><div class="kicker" style="color:var(--bad)">Pior modo de falha</div><h3>Sensor congelado</h3><p class="muted">Continua enviando leituras válidas, e a ingestão não percebe. Com 10% congelados, D transbordou cerca de <b>5×</b> mais que A.</p></div>
+    </div>
+    <div class="callout" style="margin-top:22px"><b>Resultado inesperado, relatado como limitação</b>Mais ruído de medição <i>reduziu</i> o transbordamento. O modelo de superfície irregular faz o sensor ler o lixo mais alto do que está (viés de ~0,8σ), e o ruído extra antecipa coletas. Ruído e viés precisam ser separados e calibrados com ensaios do sensor.</div>
+
+    <div class="chartcard" style="margin-top:34px">
+      <div class="chart-head">
+        <div><h3>E4 · Sensibilidade operacional</h3><p>Valor absoluto de cada métrica por política e condição. Transbordamento em escala logarítmica de cor.</p></div>
+        <div class="seg" id="e4-m"><button data-m="ov" class="on">Transbordamento (%)</button><button data-m="km">km/dia</button></div>
+      </div>
+      <div id="e4-heat" class="tablewrap" style="border:0;background:none"></div>
+      <div class="scale" id="e4-scale"></div>
+    </div>
+    <div class="grid3" style="margin-top:22px">
+      <div class="card"><div class="kicker">Mudança de regime</div><h3>Onde D brilha</h3><p class="muted">Com +60% de geração em 30% dos contêineres a partir do dia 14, o calendário fixo (A) foi a 4,2% de transbordamento. D ficou em 1,6% (−2,58 p.p.) com distância praticamente igual.</p></div>
+      <div class="card"><div class="kicker">Frota insuficiente</div><h3>Dados não criam caminhão</h3><p class="muted">Com um único veículo, todas as políticas transbordaram de 18% a 32%. As políticas com telemetria transbordaram menos, mas percorreram de 44% a 60% mais.</p></div>
+      <div class="card"><div class="kicker">E5 · solver</div><h3>Ranking estável</h3><p class="muted">Trocar a descida gulosa por GLS (5 s) encurtou as rotas em menos de 1% (N = 500), sem mudar a ordem entre as políticas.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ E6 -->
+<section class="sec alt" id="e6">
+  <div class="wrap">
+    <span class="tag">E6 · integração com broker real</span>
+    <h2>A cadeia MQTT aguenta?</h2>
+    <p class="lead">Mosquitto e Paho rodando localmente, com 100 dispositivos virtuais. Os números medem a lógica de publicação, entrega e ingestão, não uma rede sem fio urbana.</p>
+    <div class="grid4" style="margin-top:24px" id="e6-kpis"></div>
+    <div class="grid2" style="margin-top:22px">
+      <div class="card">
+        <div class="kicker">Reinício do broker no meio da publicação</div>
+        <h3>QoS 0 perde, QoS 1 não</h3>
+        <div id="e6-restart"></div>
+        <p class="muted small" style="margin-top:12px">Com QoS 1, o cliente retornou erro em <span id="e6-rcfail">241</span> chamadas de publicação, e mesmo assim nenhuma mensagem se perdeu: a biblioteca guardou as mensagens na fila e as enviou após a reconexão.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">Resultado negativo, com causa identificada</div>
+        <h3>Lote × live: quase iguais</h3>
+        <p class="muted">Seis dias, 40 contêineres, política D e mesma semente. O modo live (via broker) <b>não</b> reproduziu exatamente o modo em lote:</p>
+        <div class="tablewrap"><table id="e6-eq"></table></div>
+        <p class="muted small" style="margin-top:12px">Causa: o contrato arredonda as leituras a 0,1 cm / 0,1%, e isso mudou uma decisão de limiar. Com o mesmo arredondamento aplicado no lote, as cinco métricas coincidiram <b>exatamente</b>. A cadeia MQTT não introduz outras diferenças.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ANIMAÇÕES -->
+<section class="sec" id="animacoes">
+  <div class="wrap">
+    <span class="tag">Em movimento</span>
+    <h2>Animações</h2>
+    <p class="lead">Geradas a partir de execuções gravadas do simulador (semente 1001), com a mesma malha e as mesmas posições usadas nos experimentos.</p>
+    <div class="videos" style="margin-top:26px">
+      <div class="v wide">
+        <video controls muted loop playsinline preload="none" poster="assets/posters/D_comparacao_A_D.jpg"><source src="assets/anim/D_comparacao_A_D.mp4" type="video/mp4"></video>
+        <h4>A × D lado a lado</h4><p>Mesma semente e mesma demanda: calendário fixo contra política preditiva, com rotas, coletas e transbordamentos acumulados.</p>
+      </div>
+      <div class="v">
+        <video controls muted loop playsinline preload="none" poster="assets/posters/E_falha_comunicacao.jpg"><source src="assets/anim/E_falha_comunicacao.mp4" type="video/mp4"></video>
+        <h4>Falha de comunicação</h4><p>Interrupção regional de 48 h em 50% dos dispositivos: à esquerda o estado verdadeiro, à direita o que a plataforma vê.</p>
+      </div>
+      <div class="v">
+        <video controls muted loop playsinline preload="none" poster="assets/posters/B_telemetria_mqtt.jpg"><source src="assets/anim/B_telemetria_mqtt.mp4" type="video/mp4"></video>
+        <h4>Telemetria via Mosquitto</h4><p>Gravada do modo live: mensagens recebidas pelo broker real, eventos de limiar e leituras inválidas.</p>
+      </div>
+      <div class="v">
+        <video controls muted loop playsinline preload="none" poster="assets/posters/A_enchimento.jpg"><source src="assets/anim/A_enchimento.mp4" type="video/mp4"></video>
+        <h4>Enchimento</h4><p>Ocupação verdadeira de seis contêineres sob a política A: enchem em ritmos diferentes e são esvaziados no calendário fixo.</p>
+      </div>
+      <div class="v">
+        <video controls muted loop playsinline preload="none" poster="assets/posters/C_coleta_veiculos.jpg"><source src="assets/anim/C_coleta_veiculos.mp4" type="video/mp4"></video>
+        <h4>Coleta com veículos</h4><p>Política D: seleção diária, rotas OR-Tools e veículos percorrendo a malha.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ PAINEL -->
+<section class="sec alt" id="painel">
+  <div class="wrap">
+    <span class="tag">Painel web</span>
+    <h2>Operação, replay e resultados</h2>
+    <p class="lead">No computador, o painel acompanha a simulação ao vivo pelo broker. Aqui ele roda em modo estático: o replay A × D é interativo (arraste para mover o mapa e use a roda do mouse para zoom), e a aba "ao vivo" mostra um instantâneo gravado.</p>
+    <div class="embed" style="margin-top:24px">
+      <div class="bar"><i></i><i></i><i></i><span style="margin-left:8px">painel/ · replay A × D</span><a href="painel/" style="margin-left:auto">abrir em tela cheia ↗</a></div>
+      <iframe src="painel/?tab=replay" title="Painel interativo: replay A × D" loading="lazy"></iframe>
+    </div>
+    <div class="grid2" style="margin-top:22px">
+      <figure><img src="assets/fig/painel_ao_vivo.png" alt="Captura do painel em operação ao vivo" loading="lazy"><figcaption>Operação ao vivo: 80 dispositivos publicando via Mosquitto, com KPIs e eventos MQTT.</figcaption></figure>
+      <figure><img src="assets/fig/painel_replay.png" alt="Captura do replay A × D" loading="lazy"><figcaption>Replay sincronizado das políticas A e D.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FIGURAS -->
+<section class="sec" id="figuras">
+  <div class="wrap">
+    <span class="tag">Do artigo</span>
+    <h2>Figuras</h2>
+    <p class="lead">Clique para ampliar. Todas são geradas por <code>python -m experiments.figures</code> a partir dos resultados brutos.</p>
+    <div class="gallery" style="margin-top:24px">
+      <figure><img src="assets/fig/fig_mapa_rotas.png" alt="Rotas das políticas A e D no dia 10" loading="lazy"><figcaption>Rotas de A e D no mesmo dia; círculos = horas de contêiner cheio.</figcaption></figure>
+      <figure><img src="assets/fig/fig_e1.png" alt="Figura E1" loading="lazy"><figcaption>E1: km/dia e transbordamento por escala.</figcaption></figure>
+      <figure><img src="assets/fig/fig_e2.png" alt="Figura E2" loading="lazy"><figcaption>E2: fronteiras distância × serviço.</figcaption></figure>
+      <figure><img src="assets/fig/fig_e3.png" alt="Figura E3" loading="lazy"><figcaption>E3: degradação sob falhas de telemetria.</figcaption></figure>
+      <figure><img src="assets/fig/fig_e4.png" alt="Figura E4" loading="lazy"><figcaption>E4: sensibilidade operacional.</figcaption></figure>
+      <figure><img src="assets/fig/fig_series.png" alt="Séries temporais de ocupação" loading="lazy"><figcaption>Ocupação de contêineres sob A e D.</figcaption></figure>
+      <figure><img src="assets/fig/fig_hist_coleta.png" alt="Histograma da ocupação na coleta" loading="lazy"><figcaption>Ocupação no momento da coleta.</figcaption></figure>
+      <figure><img src="assets/fig/fig_falha.png" alt="Dados desatualizados durante interrupção" loading="lazy"><figcaption>Interrupção regional: fração sem dado recente.</figcaption></figure>
+      <figure><img src="assets/fig/fig_sensor.png" alt="Fórmula do sensor 2024 vs 2026" loading="lazy"><figcaption>Indicador de 2024 × ocupação de 2026.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ INTEGRIDADE -->
+<section class="sec alt" id="integridade">
+  <div class="wrap">
+    <span class="tag">Rigor</span>
+    <h2>Como sabemos que os números estão certos</h2>
+    <div class="grid4" style="margin-top:24px" id="int-kpis"></div>
+    <div class="grid2" style="margin-top:26px">
+      <div>
+        <h3>Método</h3>
+        <ul class="clean">
+          <li>Protocolo experimental escrito <b>antes</b> das rodadas definitivas; uma emenda após revisão independente do código, registrada com justificativa</li>
+          <li>Comparações pareadas por semente, IC 95% por bootstrap (10.000 reamostragens), Wilcoxon bilateral e correção de Holm por família</li>
+          <li>Ausência de significância não é tratada como equivalência</li>
+          <li>Nenhuma execução removida; desvios e incidentes registrados em <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/desvios-protocolo.md">docs/desvios-protocolo.md</a></li>
+          <li>Cada referência conferida por DOI ou fonte primária, com o nível de leitura (texto completo ou resumo) registrado</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Resultados negativos, publicados</h3>
+        <ul class="clean">
+          <li>D não transbordou significativamente menos que A com 20 ou 100 contêineres</li>
+          <li>B (limiar puro) não economizou distância em relação a A com 100 contêineres</li>
+          <li>Lote e live não coincidiram sem a quantização do payload</li>
+          <li>Mais ruído reduziu o transbordamento (viés do modelo de sensor)</li>
+          <li>Sensores congelados pioraram D a ponto de transbordar ~5× mais que A</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:28px"><b>Limites das conclusões</b>Nada aqui mostra que a coleta inteligente funcione em Aracaju ou em outra cidade. Os resultados dependem de perfis de geração não calibrados, de posições hipotéticas e de um modelo de operação simplificado (velocidade constante, sem trânsito, uma viagem planejada por turno). O que o projeto oferece é uma plataforma aberta em que essas hipóteses podem ser trocadas por dados reais.</div>
+  </div>
+</section>
+
+<!-- ============================================================ REPRODUZIR -->
+<section class="sec" id="reproduzir">
+  <div class="wrap">
+    <span class="tag">Faça você mesmo</span>
+    <h2>Reproduza tudo</h2>
+    <p class="lead">Linux, Python 3.12 e Docker ou Podman. Nenhum serviço pago ou credencial. As versões estão fixadas em <code>requirements-lock.txt</code>, e os manifestos registram o ambiente de cada rodada.</p>
+    <div class="grid2" style="margin-top:24px">
+      <div class="codewrap"><button class="copy">copiar</button>
+<pre><span class="c"># ambiente e testes</span>
+git clone https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos
+cd IoT-Gestao-Residuos-Solidos-Urbanos
+uv venv --python 3.12 .venv && source .venv/bin/activate
+uv pip install -r requirements-lock.txt
+python -m pytest -q
+
+<span class="c"># broker local + simulação ao vivo + painel</span>
+scripts/broker.sh start
+python -m wastesim.live --n 80 --days 4 --policy D --step-wall 0.25 &amp;
+uvicorn dashboard.app:app --port 8050   <span class="c"># http://127.0.0.1:8050</span></pre>
+      </div>
+      <div class="codewrap"><button class="copy">copiar</button>
+<pre><span class="c"># experimentos (retomáveis; ~1–2 h com 5 processos)</span>
+python -m experiments.run E1 E2 E3 E4 --workers 5
+python -m experiments.run E5 --workers 3
+python -m experiments.mqtt_integration     <span class="c"># E6</span>
+
+<span class="c"># análise, figuras, animações e verificação</span>
+python -m experiments.replay
+python -m experiments.analysis
+python -m experiments.figures
+python -m experiments.animations
+python scripts/verify_reproducibility.py
+
+<span class="c"># artigo (TeX Live 2026 em contêiner)</span>
+scripts/build_paper.sh                     <span class="c"># → paper/tcc-2026.pdf</span></pre>
+      </div>
+    </div>
+    <h3 style="margin-top:44px">Estrutura do repositório</h3>
+    <div class="tablewrap" style="margin-top:12px"><table>
+      <tr><th>Pasta</th><th>Conteúdo</th></tr>
+      <tr><td><code>original/</code></td><td class="wrap-ok">Material de 2024 preservado (SHA256SUMS; tag <code>v1.0-original-2024</code>)</td></tr>
+      <tr><td><code>firmware/</code></td><td class="wrap-ok">Firmware ESP32 2.0, auditoria, log de compilação, circuito Wokwi</td></tr>
+      <tr><td><code>wastesim/</code></td><td class="wrap-ok">Simulador, sensor, canal, ingestão, MQTT, roteirização, políticas</td></tr>
+      <tr><td><code>experiments/</code></td><td class="wrap-ok">Definições, executor, análise, figuras, animações; <code>raw/</code> com uma linha JSON por execução</td></tr>
+      <tr><td><code>dashboard/</code></td><td class="wrap-ok">Painel web (FastAPI + JavaScript sem dependências)</td></tr>
+      <tr><td><code>docs/</code></td><td class="wrap-ok">Contrato MQTT, protocolo experimental, parâmetros, auditoria do TCC, desvios</td></tr>
+      <tr><td><code>paper/</code></td><td class="wrap-ok">Artigo LaTeX (template SBC), diagramas TikZ, referências verificadas</td></tr>
+      <tr><td><code>data/aracaju/</code></td><td class="wrap-ok">Malha viária extraída do OSM (ODbL) e contorno municipal</td></tr>
+      <tr><td><code>site/</code></td><td class="wrap-ok">Este site (publicado pelo GitHub Actions)</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============================================================ ARTIGO -->
+<section class="sec alt" id="artigo">
+  <div class="wrap">
+    <div class="grid2" style="align-items:center">
+      <div>
+        <span class="tag">Artigo</span>
+        <h2>Monitoramento IoT com MQTT e coleta de resíduos sólidos urbanos orientada por dados</h2>
+        <p class="muted">Plataforma de simulação e avaliação experimental na malha viária de Aracaju (SE). Template SBC, 47 páginas, com resumo em português e inglês.</p>
+        <div class="ctas">
+          <a class="btn line" href="assets/docs/tcc-2026.pdf">Baixar PDF</a>
+          <a class="btn line" href="assets/docs/overleaf-tcc-2026.zip">Projeto LaTeX (zip para Overleaf)</a>
+          <a class="btn line" href="https://labic.dev.br/article/9/">Artigo original (2024)</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kicker">Resumo</div>
+        <p style="font-size:.94rem;color:var(--ink-2)">Este trabalho avalia, por simulação, se o monitoramento do nível de contêineres por IoT e MQTT torna a coleta de resíduos sólidos urbanos mais eficiente. O firmware ESP32 do protótipo de 2024 foi auditado e reescrito, especificou-se um contrato MQTT 3.1.1 e construiu-se uma plataforma aberta que compara quatro políticas na malha viária real de Aracaju, com contêineres hipotéticos. No mesmo nível de serviço (1% de transbordamento), as políticas dinâmica e preditiva exigiram de 8,8% a 9,7% menos distância que a coleta periódica. Perder até metade das mensagens teve pouco efeito, e os sensores congelados foram o modo de falha mais grave.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <h4>Coleta Inteligente de Resíduos</h4>
+      <p>TCC original (2024): Felipe J. dos S., Stephanie K. A. De Sousa, Rubens D. S. Matos Jr. e Fabio L. Sá P. Instituto Federal de Sergipe (IFS), campus Lagarto. A versão de 2026 contou com assistência de ferramenta de IA (Claude, Anthropic), declarada no artigo.</p>
+      <p>Código sob GPL-3.0. Malha viária © colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, sob ODbL 1.0.</p>
+    </div>
+    <div>
+      <h4>Documentos</h4>
+      <p><a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/protocolo-experimental.md">Protocolo experimental</a><br>
+      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/parametros.md">Parâmetros e fontes</a><br>
+      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/mqtt/contrato-mqtt.md">Contrato MQTT</a><br>
+      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/firmware/AUDITORIA.md">Auditoria do firmware</a><br>
+      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/auditoria-tcc-original.md">Auditoria do TCC</a></p>
+    </div>
+    <div>
+      <h4>Projeto</h4>
+      <p><a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos">Repositório</a><br>
+      <a href="painel/">Painel estático</a><br>
+      <a href="data/resultados.json">Dados deste site (JSON)</a><br>
+      <a href="#topo">Voltar ao topo ↑</a></p>
+    </div>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="lb" id="lb"><img alt=""></div>
+<script src="assets/app.js"></script>
+</body>
+</html>

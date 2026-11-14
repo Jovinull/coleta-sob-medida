@@ -88,7 +88,8 @@ def anim_A():
     ax.set_xlim(t[0] / 86400, t[-1] / 86400), ax.set_ylim(0, 105)
     ax.set_xlabel("dia"), ax.set_ylabel("ocupação verdadeira (%)")
     ax.legend(ncol=3, fontsize=7, frameon=False, loc="upper left")
-    ttl = ax.set_title("")
+    # título provisório com o mesmo tamanho do final, para o tight_layout reservar espaço
+    ttl = ax.set_title(f"Enchimento de 6 contêineres — política A (periódica) — {hhmm(t[0])}")
     fig.tight_layout()
 
     def upd(k):
@@ -196,7 +197,7 @@ def anim_C():
     run = R["runs"][1]
     fig, ax = plt.subplots(figsize=(5, 7))
     art = _replay_map(ax, R, run, _bbox(R))
-    ttl = ax.set_title("")
+    ttl = ax.set_title("Política D (preditiva)\n0 km")  # duas linhas, para o tight_layout
     fig.tight_layout()
 
     def upd(k):
