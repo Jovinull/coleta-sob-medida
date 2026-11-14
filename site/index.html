@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coleta Inteligente de Resíduos — IoT, MQTT e simulação</title>
+<title>Coleta Sob Medida — IoT, MQTT e simulação da coleta de resíduos</title>
 <meta name="description" content="Do protótipo ESP32 + MQTT de 2024 a um estudo experimental reprodutível: 4.110 simulações pareadas na malha viária de Aracaju comparam coleta periódica, por limiar, dinâmica e preditiva.">
-<meta property="og:title" content="Coleta Inteligente de Resíduos — IoT, MQTT e simulação">
+<meta property="og:title" content="Coleta Sob Medida — IoT, MQTT e simulação da coleta de resíduos">
 <meta property="og:description" content="Firmware ESP32 auditado, contrato MQTT, simulador aberto, 4.110 execuções pareadas, painel web e artigo completo.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="assets/og.png">
@@ -24,7 +24,7 @@
   <div class="wrap">
     <a class="brand" href="#topo" aria-label="Início">
       <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="7" y="9" width="18" height="20" rx="3" fill="#0f7a63"/><rect x="5" y="5" width="22" height="4" rx="2" fill="#0f7a63"/><rect x="10" y="17" width="12" height="9" rx="1.5" fill="#6ff0c9"/></svg>
-      <span>Coleta Inteligente</span>
+      <span>Coleta Sob Medida</span>
     </a>
     <nav class="nav" id="nav">
       <a href="#historia">História</a>
@@ -41,7 +41,7 @@
     <button class="iconbtn" id="tema" title="Alternar tema claro/escuro" aria-label="Alternar tema">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
-    <a class="iconbtn" href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos" title="Repositório no GitHub" aria-label="GitHub">
+    <a class="iconbtn" href="https://github.com/Jovinull/coleta-sob-medida" title="Repositório no GitHub" aria-label="GitHub">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
     </a>
   </div>
@@ -58,7 +58,7 @@
         <a class="btn primary" href="#resultados">Ver os resultados →</a>
         <a class="btn ghost" href="assets/docs/tcc-2026.pdf">Artigo (PDF, 47 p.)</a>
         <a class="btn ghost" href="painel/">Painel interativo</a>
-        <a class="btn ghost" href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos">Código</a>
+        <a class="btn ghost" href="https://github.com/Jovinull/coleta-sob-medida">Código</a>
       </div>
       <p class="small" style="font-size:.82rem;margin-top:14px">Malha viária real (OpenStreetMap). Posições de contêineres e depósito <b style="color:#fff">hipotéticas</b>. Os resultados são de simulação e não representam o serviço de coleta de Aracaju.</p>
     </div>
@@ -228,7 +228,7 @@
   <div class="wrap">
     <span class="tag">Hardware e firmware</span>
     <h2>27 defeitos, cada um com evidência</h2>
-    <p class="lead">O firmware de 2024 foi lido linha a linha, compilado contra as duas bibliotecas "Ultrasonic" candidatas e conferido com os datasheets. Cada defeito tem linha, evidência, impacto e correção (<a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/firmware/AUDITORIA.md">auditoria completa</a>).</p>
+    <p class="lead">O firmware de 2024 foi lido linha a linha, compilado contra as duas bibliotecas "Ultrasonic" candidatas e conferido com os datasheets. Cada defeito tem linha, evidência, impacto e correção (<a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/firmware/AUDITORIA.md">auditoria completa</a>).</p>
     <div class="grid4" style="margin:26px 0">
       <div class="kpi bad"><b>3</b><span>críticos: credenciais Wi-Fi em texto claro, broker público sem autenticação, ECHO de 5 V em GPIO de 3,3 V</span></div>
       <div class="kpi"><b>10</b><span>altos: dado errado ou falha funcional</span></div>
@@ -510,7 +510,7 @@
           <li>Protocolo experimental escrito <b>antes</b> das rodadas definitivas; uma emenda após revisão independente do código, registrada com justificativa</li>
           <li>Comparações pareadas por semente, IC 95% por bootstrap (10.000 reamostragens), Wilcoxon bilateral e correção de Holm por família</li>
           <li>Ausência de significância não é tratada como equivalência</li>
-          <li>Nenhuma execução removida; desvios e incidentes registrados em <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/desvios-protocolo.md">docs/desvios-protocolo.md</a></li>
+          <li>Nenhuma execução removida; desvios e incidentes registrados em <a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/docs/desvios-protocolo.md">docs/desvios-protocolo.md</a></li>
           <li>Cada referência conferida por DOI ou fonte primária, com o nível de leitura (texto completo ou resumo) registrado</li>
         </ul>
       </div>
@@ -538,8 +538,8 @@
     <div class="grid2" style="margin-top:24px">
       <div class="codewrap"><button class="copy">copiar</button>
 <pre><span class="c"># ambiente e testes</span>
-git clone https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos
-cd IoT-Gestao-Residuos-Solidos-Urbanos
+git clone https://github.com/Jovinull/coleta-sob-medida
+cd coleta-sob-medida
 uv venv --python 3.12 .venv && source .venv/bin/activate
 uv pip install -r requirements-lock.txt
 python -m pytest -q
@@ -607,21 +607,21 @@ scripts/build_paper.sh                     <span class="c"># → paper/tcc-2026.
 <footer>
   <div class="wrap cols">
     <div>
-      <h4>Coleta Inteligente de Resíduos</h4>
+      <h4>Coleta Sob Medida</h4>
       <p>TCC original (2024): Felipe J. dos S., Stephanie K. A. De Sousa, Rubens D. S. Matos Jr. e Fabio L. Sá P. Instituto Federal de Sergipe (IFS), campus Lagarto. A versão de 2026 contou com assistência de ferramenta de IA (Claude, Anthropic), declarada no artigo.</p>
       <p>Código sob GPL-3.0. Malha viária © colaboradores do <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, sob ODbL 1.0.</p>
     </div>
     <div>
       <h4>Documentos</h4>
-      <p><a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/protocolo-experimental.md">Protocolo experimental</a><br>
-      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/parametros.md">Parâmetros e fontes</a><br>
-      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/mqtt/contrato-mqtt.md">Contrato MQTT</a><br>
-      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/firmware/AUDITORIA.md">Auditoria do firmware</a><br>
-      <a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos/blob/main/docs/auditoria-tcc-original.md">Auditoria do TCC</a></p>
+      <p><a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/docs/protocolo-experimental.md">Protocolo experimental</a><br>
+      <a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/docs/parametros.md">Parâmetros e fontes</a><br>
+      <a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/docs/mqtt/contrato-mqtt.md">Contrato MQTT</a><br>
+      <a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/firmware/AUDITORIA.md">Auditoria do firmware</a><br>
+      <a href="https://github.com/Jovinull/coleta-sob-medida/blob/main/docs/auditoria-tcc-original.md">Auditoria do TCC</a></p>
     </div>
     <div>
       <h4>Projeto</h4>
-      <p><a href="https://github.com/Jovinull/IoT-Gestao-Residuos-Solidos-Urbanos">Repositório</a><br>
+      <p><a href="https://github.com/Jovinull/coleta-sob-medida">Repositório</a><br>
       <a href="painel/">Painel estático</a><br>
       <a href="data/resultados.json">Dados deste site (JSON)</a><br>
       <a href="#topo">Voltar ao topo ↑</a></p>

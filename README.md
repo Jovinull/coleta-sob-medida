@@ -1,11 +1,13 @@
 <p align="center">
-  <a href="https://jovinull.github.io/IoT-Gestao-Residuos-Solidos-Urbanos/"><img src="site/assets/og.png" alt="Sensores nas lixeiras tornam a coleta mais eficiente? 4.110 simulações pareadas na malha de Aracaju" width="820"></a>
+  <a href="https://jovinull.github.io/coleta-sob-medida/"><img src="site/assets/og.png" alt="Sensores nas lixeiras tornam a coleta mais eficiente? 4.110 simulações pareadas na malha de Aracaju" width="820"></a>
 </p>
 
-<h1 align="center">Monitoramento IoT com MQTT e coleta de resíduos sólidos urbanos orientada por dados</h1>
+<h1 align="center">Coleta Sob Medida</h1>
+
+<p align="center"><i>Monitoramento IoT com MQTT e coleta de resíduos sólidos urbanos orientada por dados</i></p>
 
 <p align="center">
-  <a href="https://jovinull.github.io/IoT-Gestao-Residuos-Solidos-Urbanos/"><img alt="Site" src="https://img.shields.io/badge/site-GitHub%20Pages-0f7a63?style=flat-square"></a>
+  <a href="https://jovinull.github.io/coleta-sob-medida/"><img alt="Site" src="https://img.shields.io/badge/site-GitHub%20Pages-0f7a63?style=flat-square"></a>
   <a href="paper/tcc-2026.pdf"><img alt="Artigo" src="https://img.shields.io/badge/artigo-PDF%2C%2047%20p.-1c5cab?style=flat-square"></a>
   <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white">
   <img alt="ESP32" src="https://img.shields.io/badge/ESP32-firmware%202.0-E7352C?style=flat-square&logo=espressif&logoColor=white">
@@ -16,8 +18,8 @@
 </p>
 
 <p align="center">
-  <b><a href="https://jovinull.github.io/IoT-Gestao-Residuos-Solidos-Urbanos/">Site do projeto</a></b> ·
-  <a href="https://jovinull.github.io/IoT-Gestao-Residuos-Solidos-Urbanos/painel/">Painel interativo</a> ·
+  <b><a href="https://jovinull.github.io/coleta-sob-medida/">Site do projeto</a></b> ·
+  <a href="https://jovinull.github.io/coleta-sob-medida/painel/">Painel interativo</a> ·
   <a href="paper/tcc-2026.pdf">Artigo (PDF)</a> ·
   <a href="#reprodução">Reproduzir</a>
 </p>
@@ -125,7 +127,7 @@ C = dinâmica com prêmios (OR-Tools), D = preditiva.
 
 O painel (FastAPI + JavaScript sem dependências) mostra a operação ao vivo
 pelo broker, o replay A × D e os resultados. Uma versão estática, com o replay
-interativo, está no [site do projeto](https://jovinull.github.io/IoT-Gestao-Residuos-Solidos-Urbanos/painel/).
+interativo, está no [site do projeto](https://jovinull.github.io/coleta-sob-medida/painel/).
 
 | Animação | Conteúdo |
 |---|---|
