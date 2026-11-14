@@ -1,0 +1,77 @@
+# Log de compilação — firmware/esp32_lixeira
+# Gerado em: 2026-11-14T13:37:45Z (UTC)
+# Host: Linux x86_64
+# Ferramenta: arduino-cli  Version: 1.5.1 Commit: 01f3d4f2b Date: 2026-06-05T10:22:17Z
+# Núcleo: esp32:esp32 3.3.12    3.3.12 esp32
+# Bibliotecas:
+#   Name                    Installed   Available   Location Description
+#   Adafruit Unified Sensor 1.1.15      -           user     -
+#   ArduinoJson             7.4.3       -           user     -
+#   DHT sensor library      1.4.7       -           user     -
+#   PubSubClient            2.8         -           user     -
+#   
+# FQBN: esp32:esp32:esp32doit-devkit-v1 (DOIT ESP32 DEVKIT V1)
+# config.h: cópia temporária de config.example.h (fora do repositório)
+# Observação: o núcleo 3.3.12 foi instalado com um índice local filtrado que omite apenas
+#   as ferramentas de outros chips (toolchain RISC-V e libs de C3/C5/C6/H2/P4/S2/S3),
+#   por falta de espaço em /tmp; os arquivos instalados são os mesmos do índice oficial,
+#   com os mesmos checksums (ver firmware/README.md).
+
+==================================================================
+## Variante: padrao
+## Comando: arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all esp32_lixeira
+------------------------------------------------------------------
+Sketch uses 941910 bytes (71%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 51284 bytes (15%) of dynamic memory, leaving 276396 bytes for local variables. Maximum is 327680 bytes.
+exit=0
+
+==================================================================
+## Variante: tls_ca
+##   ajuste em config.h: s|^// #define CFG_MQTT_TLS 1|#define CFG_MQTT_TLS 1|
+##   ajuste em config.h: s|^// #define CFG_MQTT_CA_PEM R"PEM(|#define CFG_MQTT_CA_PEM "-----BEGIN CERTIFICATE-----\\n...\\n-----END CERTIFICATE-----\\n"|
+## Comando: arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all esp32_lixeira
+------------------------------------------------------------------
+Sketch uses 1031802 bytes (78%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 51828 bytes (15%) of dynamic memory, leaving 275852 bytes for local variables. Maximum is 327680 bytes.
+exit=0
+
+==================================================================
+## Variante: sem_dht_log4
+##   ajuste em config.h: s|^#define CFG_HABILITAR_DHT 1|#define CFG_HABILITAR_DHT 0|
+##   ajuste em config.h: s|^#define CFG_NIVEL_LOG 3|#define CFG_NIVEL_LOG 4|
+## Comando: arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all esp32_lixeira
+------------------------------------------------------------------
+Sketch uses 940386 bytes (71%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 51260 bytes (15%) of dynamic memory, leaving 276420 bytes for local variables. Maximum is 327680 bytes.
+exit=0
+
+==================================================================
+## Variante: wokwi_dht22
+##   ajuste em config.h: s|^#define CFG_DHT_TIPO DHT11|#define CFG_DHT_TIPO DHT22|
+##   ajuste em config.h: s|"COLOQUE_O_SSID_AQUI"|"Wokwi-GUEST"|
+##   ajuste em config.h: s|"COLOQUE_A_SENHA_AQUI"|""|
+##   ajuste em config.h: s|"192.168.0.10"|"host.wokwi.internal"|
+## Comando: arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 --warnings all esp32_lixeira
+------------------------------------------------------------------
+Sketch uses 941874 bytes (71%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 51284 bytes (15%) of dynamic memory, leaving 276396 bytes for local variables. Maximum is 327680 bytes.
+exit=0
+
+==================================================================
+## Uso de memória por seção (variante padrao, xtensa-esp32-elf-size -A, seções principais)
+.rtc.text                     0   1074528256
+.rtc.dummy                    0   1073217536
+.rtc.force_fast               0   1073217536
+.rtc_noinit                   0   1342177792
+.rtc.force_slow              32   1342177792
+.rtc_fast_reserved           16   1073225712
+.rtc_slow_reserved           24   1342185448
+.iram0.vectors             1028   1074266112
+.iram0.text               85167   1074267140
+.dram0.data               24363   1073470304
+.dram0.bss                26920   1073494672
+.flash.appdesc              256   1061158944
+.flash.rodata            113716   1061159200
+.flash.rodata_noload      24898   1061283884
+.flash.text              706412   1074593824
+.iram0.text_end               1   1074352307

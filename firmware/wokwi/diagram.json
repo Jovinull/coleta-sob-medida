@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "author": "IoT-Gestao-Residuos-Solidos-Urbanos",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "us", "top": -163.2, "left": -101.3, "attrs": { "distance": "40" } },
+    { "type": "wokwi-dht22", "id": "dht", "top": -124.5, "left": 177, "attrs": { "temperature": "28", "humidity": "70" } },
+    { "type": "wokwi-resistor", "id": "r_led", "top": 147.95, "left": 172.8, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led", "top": 102, "left": 253.4, "attrs": { "color": "blue" } }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "us:VCC", "esp:VIN", "red", [] ],
+    [ "us:GND", "esp:GND.2", "black", [] ],
+    [ "us:TRIG", "esp:D14", "green", [] ],
+    [ "us:ECHO", "esp:D27", "orange", [] ],
+    [ "dht:VCC", "esp:3V3", "red", [] ],
+    [ "dht:GND", "esp:GND.1", "black", [] ],
+    [ "dht:SDA", "esp:D4", "blue", [] ],
+    [ "esp:D2", "r_led:1", "violet", [] ],
+    [ "r_led:2", "led:A", "violet", [] ],
+    [ "led:C", "esp:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}

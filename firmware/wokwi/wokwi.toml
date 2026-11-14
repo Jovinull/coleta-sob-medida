@@ -1,0 +1,9 @@
+# Projeto Wokwi (VS Code / wokwi-cli) para o firmware da lixeira.
+# Gere os binários antes com a configuração de simulação (ver firmware/README.md):
+#   arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 \
+#     --output-dir firmware/wokwi/build firmware/esp32_lixeira
+# Caminhos relativos a este arquivo.
+[wokwi]
+version = 1
+firmware = 'build/esp32_lixeira.ino.merged.bin'
+elf = 'build/esp32_lixeira.ino.elf'

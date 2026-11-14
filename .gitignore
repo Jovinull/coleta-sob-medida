@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+firmware/esp32_lixeira/config.h
+data/cache/
+experiments/raw/*.parquet.tmp
+paper/build/
+*.aux
+*.log
+*.blg
+*.bbl
+*.out
+*.toc
+*.synctex.gz
+live/*.db
+wastesim.egg-info/
